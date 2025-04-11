@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="shop.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <title>Шашки с RPG-элементами</title>
+</head>
+<body>
+    <div id="main-menu" class="main-menu">
+        <img src="images/logo.png" alt="Логотип игры" class="game-logo">
+        <div class="menu-buttons">
+            <button id="start-game" class="menu-button">
+                <span class="material-icons-round">play_arrow</span>
+                Начать игру
+            </button>
+            <button id="rules" class="menu-button">
+                <span class="material-icons-round">menu_book</span>
+                Правила
+            </button>
+            <button id="settings" class="menu-button">
+                <span class="material-icons-round">settings</span>
+                Настройки
+            </button>
+        </div>
+    </div>
+    <div id="board" style="display: none;"></div>
+    <div id="pieces-counter" class="pieces-counter">
+        <div class="counter black-counter">
+            <div class="counter-value" id="black-pieces-count">12</div>
+        </div>
+        <div class="counter white-counter">
+            <div class="counter-value" id="white-pieces-count">12</div>
+        </div>
+    </div>
+    <div id="piece-info" class="piece-info">
+        <div class="piece-info-header">
+            <div class="piece-info-icon"></div>
+            <div class="piece-info-title-container">
+                <div class="piece-info-title"></div>
+                <div class="piece-info-level"></div>
+            </div>
+        </div>
+        <div class="piece-info-stats">
+            <div class="piece-info-stat">
+                <span class="material-icons-round piece-info-stat-icon">favorite</span>
+                <span class="piece-info-stat-value">Жизни: <span id="health-stat">3/3</span>
+                    <span class="material-icons-round upgrade-icon" id="health-upgrade" style="font-size: 16px; margin-left: 5px; color: #4CAF50; cursor: pointer;">add</span>
+                    <span class="material-icons-round" style="font-size: 16px; margin-left: 2px; color: #FFC107;">monetization_on</span>
+                </span>
+                <div class="health-bar">
+                    <div class="health-bar-fill"></div>
+                </div>
+            </div>
+            <div class="piece-info-stat">
+                <span class="material-icons-round piece-info-stat-icon">gavel</span>
+                <span class="piece-info-stat-value">Атака: <span id="attack-stat">1</span>
+                    <span class="material-icons-round upgrade-icon" id="attack-upgrade" style="font-size: 16px; margin-left: 5px; color: #4CAF50; cursor: pointer;">add</span>
+                    <span class="material-icons-round" style="font-size: 16px; margin-left: 2px; color: #FFC107;">monetization_on</span>
+                </span>
+            </div>
+            <div class="piece-info-stat">
+                <span class="material-icons-round piece-info-stat-icon">directions_run</span>
+                <span class="piece-info-stat-value">Ходы: <span id="moves-stat">0</span></span>
+            </div>
+            <div class="piece-info-stat">
+                <span class="material-icons-round piece-info-stat-icon">flash_on</span>
+                <span class="piece-info-stat-value">Захваты: <span id="captures-stat">0</span></span>
+            </div>
+            <div class="piece-info-stat">
+                <span class="material-icons-round piece-info-stat-icon">military_tech</span>
+                <span class="piece-info-stat-value">Статус: <span id="status-stat">Обычная</span></span>
+            </div>
+        </div>
+        <div class="piece-info-abilities">
+            <div class="piece-info-ability">
+                <span class="material-icons-round">info</span>
+                <span id="piece-abilities"></span>
+            </div>
+        </div>
+    </div>
+    <script src="sound-manager.js"></script>
+    <script src="rpg.js"></script>
+    <script src="shop.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Инициализация звуков после загрузки страницы
+        window.addEventListener('load', () => {
+            soundManager.preloadGameSounds();
+            // Добавим проверку загрузки звуков
+            console.log('Звуки инициализированы');
+            
+            // Инициализируем счетчики пешек
+            initCounters();
+            if (typeof forceShowPiecesCounter === 'function') {
+                forceShowPiecesCounter();
+            }
+            console.log('Счетчики пешек инициализированы');
+            
+            // Инициализируем магазин
+            if (window.shop && typeof window.shop.init === 'function') {
+                window.shop.init();
+                console.log('Магазин инициализирован');
+            }
+        });
+    </script>
+</body>
+</html>

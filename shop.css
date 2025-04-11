@@ -1,0 +1,305 @@
+/* Стили для модального окна магазина */
+.shop-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.shop-modal.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.shop-content {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    border-radius: 12px;
+    padding: 24px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.shop-modal.visible .shop-content {
+    transform: translateY(0);
+}
+
+.shop-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.shop-header h2 {
+    color: #fff;
+    font-size: 24px;
+    margin: 0;
+    font-weight: 600;
+}
+
+.shop-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.shop-timer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    font-size: 18px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 8px 16px;
+    border-radius: 20px;
+}
+
+.shop-timer .material-icons-round {
+    color: #e74c3c;
+}
+
+.shop-close-button {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.shop-close-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transform: scale(1.1);
+}
+
+.shop-close-button:active {
+    transform: scale(0.95);
+}
+
+.shop-close-button .material-icons-round {
+    font-size: 24px;
+}
+
+.shop-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 16px 0;
+}
+
+.shop-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.shop-item[data-rarity="basic"] {
+    border: 1px solid #3498db;
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(52, 152, 219, 0.05));
+}
+
+.shop-item[data-rarity="rare"] {
+    border: 1px solid #9b59b6;
+    background: linear-gradient(135deg, rgba(155, 89, 182, 0.1), rgba(155, 89, 182, 0.05));
+}
+
+.shop-item[data-rarity="legendary"] {
+    border: 1px solid #e74c3c;
+    background: linear-gradient(135deg, rgba(231, 76, 60, 0.1), rgba(231, 76, 60, 0.05));
+    animation: legendary-border 2s infinite;
+}
+
+.shop-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.shop-item-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.shop-item-header .material-icons-round {
+    font-size: 24px;
+    color: #fff;
+}
+
+.shop-item-header h3 {
+    color: #fff;
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.shop-item-description {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0 0 16px 0;
+    min-height: 42px;
+}
+
+.shop-item-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+}
+
+.shop-item-cost {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #ffd700;
+    font-weight: 600;
+}
+
+.shop-item-cost .material-icons-round {
+    font-size: 18px;
+}
+
+.shop-buy-button {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.shop-buy-button:hover:not([disabled]) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(46, 204, 113, 0.3);
+}
+
+.shop-buy-button:active:not([disabled]) {
+    transform: translateY(0);
+}
+
+.shop-buy-button[disabled] {
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+@keyframes legendary-border {
+    0% {
+        box-shadow: 0 0 10px rgba(231, 76, 60, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(231, 76, 60, 0.5);
+    }
+    100% {
+        box-shadow: 0 0 10px rgba(231, 76, 60, 0.3);
+    }
+}
+
+/* Стили для кнопки открытия магазина */
+.shop-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+}
+
+.shop-button:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.shop-button:active {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.shop-button .material-icons-round {
+    font-size: 24px;
+    color: white;
+}
+
+/* Анимация для уведомлений */
+@keyframes notification-slide {
+    0% {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    10% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    90% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+}
+
+/* Медиа-запросы для адаптивности */
+@media (max-width: 768px) {
+    .shop-content {
+        width: 95%;
+        padding: 16px;
+    }
+    
+    .shop-items {
+        grid-template-columns: 1fr;
+    }
+    
+    .shop-header h2 {
+        font-size: 20px;
+    }
+    
+    .shop-timer {
+        font-size: 16px;
+        padding: 6px 12px;
+    }
+    
+    .shop-button {
+        width: 50px;
+        height: 50px;
+        bottom: 16px;
+        right: 16px;
+    }
+} 

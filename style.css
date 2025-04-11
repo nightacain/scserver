@@ -1,0 +1,2293 @@
+/* Импорт шрифтов */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons+Round');
+
+/* Базовые стили типографики */
+:root {
+    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --bg-color-start: #2c3e50;
+    --bg-color-end: #3498db;
+}
+
+/* Стили главного меню */
+.main-menu {
+    position: fixed;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    z-index: 1000;
+    padding: 4rem;
+    background: url('images/frame_menu.png') no-repeat center center;
+    background-size: 100% 100%;
+    min-width: 400px;
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-logo {
+    max-width: 300px;
+    height: auto;
+    margin-bottom: 2rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.menu-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    color: white;
+    background: linear-gradient(45deg, #2980b9, #3498db);
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.menu-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.menu-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.menu-button .material-icons-round {
+    font-size: 1.5rem;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    font-family: var(--font-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+    background: url('images/background.png') no-repeat center center fixed;
+    background-size: cover;
+}
+
+body.in-game {
+    background: none;
+}
+
+#board {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(8, 70px);
+    grid-template-rows: repeat(8, 70px);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 140px;
+    border: none;
+    background: url('images/frame.png') no-repeat center center;
+    background-size: calc(100% + 110px) calc(100% + 110px);
+    transition: transform 0.3s ease;
+    width: 560px;
+    height: 560px;
+}
+
+#board:hover {
+    transform: translate(-50%, -50%) scale(1.02);
+}
+
+.square {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.square.white {
+    background: url('images/white_pieces.png') no-repeat center center;
+    background-size: cover;
+    box-shadow: inset 3px 3px 8px rgba(255, 255, 255, 0.3),
+                inset -3px -3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.square.black {
+    background: url('images/black_pieces.png') no-repeat center center;
+    background-size: cover;
+    box-shadow: inset 3px 3px 8px rgba(0, 0, 0, 0.3),
+                inset -3px -3px 8px rgba(0, 0, 0, 0.4);
+}
+
+.piece {
+    position: relative;
+    width: 82%;
+    height: 82%;
+    border-radius: 50%;
+    margin: 9%;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    z-index: 1;
+}
+
+.piece:hover {
+    transform: translateY(-4px);
+}
+
+.piece.white {
+    background: url('images/wp.png') no-repeat center center;
+    background-size: cover;
+    border: 2px solid #e6e6e6;
+    box-shadow: inset -4px -4px 10px #f0f0f0,
+                inset 4px 4px 10px rgba(0, 0, 0, 0.1),
+                8px 8px 20px rgba(0, 0, 0, 0.2),
+                -3px -3px 15px rgba(255, 255, 255, 0.2);
+}
+
+.piece.black {
+    background: url('images/bp.png') no-repeat center center;
+    background-size: cover;
+    border: 2px solid #1a1a1a;
+    box-shadow: inset -4px -4px 10px #1a1a1a,
+                inset 4px 4px 10px rgba(255, 255, 255, 0.1),
+                8px 8px 20px rgba(0, 0, 0, 0.4),
+                -3px -3px 15px rgba(255, 255, 255, 0.1);
+}
+
+.piece.selected {
+    box-shadow: 0 0 0 4px #ffd700,
+                inset -4px -4px 10px #e0e0e0,
+                inset 4px 4px 10px rgba(0, 0, 0, 0.15),
+                12px 12px 25px rgba(0, 0, 0, 0.4),
+                0 0 20px rgba(255, 215, 0, 0.6);
+    transform: scale(1.08);
+}
+
+.piece.king {
+    position: relative;
+}
+
+.piece.king::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border: 2px dashed #ffd700;
+    border-radius: 50%;
+    animation: kingGlow 2s ease-in-out infinite;
+    pointer-events: none;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.piece.king::after {
+    content: '★';
+    font-family: Arial, sans-serif;
+    font-size: 32px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ffd700;
+    text-shadow: 1px 1px 0 #000;
+}
+
+@keyframes kingGlow {
+    0% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.5; }
+}
+
+/* Подсветка для обычных ходов */
+.highlight {
+    position: relative;
+    cursor: pointer;
+}
+
+.highlight::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 25px;
+    height: 25px;
+    background-color: rgba(0, 255, 0, 0.4);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: highlightPulse 1.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* Подсветка для взятий */
+.highlight-jump::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 35px;
+    height: 35px;
+    background-color: rgba(255, 215, 0, 0.6);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: jumpHighlightPulse 1.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* Подсветка для атаки без прыжка */
+.highlight-attack::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 35px;
+    height: 35px;
+    background-color: rgba(255, 0, 0, 0.6);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: attackHighlightPulse 1.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* Подсветка для промежуточного прыжка (при комбинированном ходе) */
+.highlight-jump-intermediate::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 30px;
+    height: 30px;
+    background-color: rgba(255, 165, 0, 0.6); /* Оранжевый цвет для промежуточного прыжка */
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: jumpHighlightPulse 1.5s ease-in-out infinite;
+    pointer-events: none;
+    border: 2px dashed rgba(255, 255, 255, 0.7); /* Пунктирная граница для обозначения промежуточной точки */
+}
+
+/* Подсветка для цели комбинированной атаки */
+.highlight-attack-target::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 40px;
+    height: 40px;
+    background-image: radial-gradient(circle, rgba(255, 0, 0, 0.6) 0%, rgba(255, 0, 0, 0) 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: attackTargetPulse 1.2s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 5;
+}
+
+@keyframes highlightPulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.7;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.7;
+    }
+}
+
+@keyframes jumpHighlightPulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        box-shadow: 0 0 5px 2px rgba(255, 215, 0, 0.4);
+        opacity: 0.7;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.1);
+        box-shadow: 0 0 15px 5px rgba(255, 215, 0, 0.6);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.8);
+        box-shadow: 0 0 5px 2px rgba(255, 215, 0, 0.4);
+        opacity: 0.7;
+    }
+}
+
+/* Анимация пульсации для подсветки атаки */
+@keyframes attackHighlightPulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        box-shadow: 0 0 5px 2px rgba(255, 0, 0, 0.4);
+        opacity: 0.7;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.1);
+        box-shadow: 0 0 15px 5px rgba(255, 0, 0, 0.6);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.8);
+        box-shadow: 0 0 5px 2px rgba(255, 0, 0, 0.4);
+        opacity: 0.7;
+    }
+}
+
+/* Анимация для цели комбинированной атаки */
+@keyframes attackTargetPulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.9);
+        opacity: 0.5;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.9);
+        opacity: 0.5;
+    }
+}
+
+/* Обновляем стили индикатора хода */
+.turn-indicator {
+    font-size: 14px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    background: #333;
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: inset -2px -2px 0 #222,
+                2px 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.turn-active {
+    background: #2d4b43;
+    color: #ffffff;
+}
+
+.opponent-turn {
+    background: #333;
+    color: #999;
+}
+
+/* Добавим анимацию для смены хода */
+@keyframes turnChange {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.turn-active {
+    animation: turnChange 0.3s ease;
+}
+
+/* Обновленные стили для RPG-элементов */
+.player-ui {
+    padding: 12px 20px;
+    border-radius: 8px;
+    background-color: #1a1a1a;
+    box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.25);
+    width: auto;
+    min-width: 600px;
+    max-width: 800px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    transition: all 0.2s ease;
+    border: 2px solid #333;
+}
+
+/* Активный UI игрока */
+.player-ui.active-player {
+    background-color: #2d2d2d;
+    box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.3);
+    transform: translateX(-50%) translateY(-2px);
+    border: 2px solid #444;
+}
+
+/* Неактивный UI игрока */
+.player-ui.inactive-player {
+    background-color: #1a1a1a;
+    opacity: 0.85;
+}
+
+/* Анимация для привлечения внимания */
+@keyframes activePlayerPulse {
+    0% { transform: translateX(-50%) scale(1.02); }
+    50% { transform: translateX(-50%) scale(1.01); }
+    100% { transform: translateX(-50%) scale(1.02); }
+}
+
+.player-ui.active-player {
+    animation: activePlayerPulse 2s infinite ease-in-out;
+}
+
+/* Обновляем стили для белого и черного UI */
+.white-ui {
+    border-left: 4px solid #fff5e6;
+    border-right: 4px solid #fff5e6;
+    bottom: 20px;
+}
+
+.black-ui {
+    border-left: 4px solid #4a4a4a;
+    border-right: 4px solid #4a4a4a;
+    top: 20px;
+}
+
+.player-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    min-width: 160px;
+}
+
+.player-name {
+    font-weight: var(--font-weight-semibold);
+    color: #ffffff;
+    font-size: var(--font-size-base);
+}
+
+.turn-indicator .material-icons-round {
+    font-size: calc(var(--font-size-base) - 2px);
+}
+
+.opponent-turn {
+    background: #333;
+    color: #999;
+}
+
+.coins {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #333;
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: #ffd700;
+    font-weight: 600;
+    font-size: 14px;
+    min-width: 100px;
+    box-shadow: inset -2px -2px 0 #222,
+                2px 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.coin-icon {
+    font-size: 20px;
+    color: #FFD700;
+}
+
+.coins-text {
+    text-shadow: 0 0 4px rgba(255, 215, 0, 0.3);
+}
+
+/* Анимация для монет при изменении */
+@keyframes coinPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.coins.updated {
+    animation: coinPulse 0.3s ease;
+}
+
+/* Стили для активного состояния */
+.active-player .coins {
+    background: #404040;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4),
+                inset 0 1px 3px rgba(255, 255, 255, 0.1);
+}
+
+.active-player .player-name {
+    color: #ffffff;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+.powerup {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    min-width: 150px;
+    flex-grow: 0;
+}
+
+.powerup-description {
+    font-size: var(--font-size-sm);
+    color: #ffffff;
+    flex-grow: 1;
+    font-weight: var(--font-weight-medium);
+}
+
+/* Стили для контейнера стоимости способностей */
+.powerups {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    max-width: 100%;
+}
+
+.powerup-button {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 40px;
+    height: 40px;
+    position: relative;
+    overflow: hidden;
+    justify-content: center;
+}
+
+.powerup-cost-container {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 4px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 2px 4px;
+    border-radius: 8px;
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    font-size: 10px;
+}
+
+/* Стили для разных категорий редкости */
+.powerup-button[data-rarity="basic"] {
+    background: linear-gradient(45deg, #2c3e50, #3498db);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15),
+                inset 0 1px 2px rgba(255, 255, 255, 0.1);
+}
+
+.powerup-button[data-rarity="rare"] {
+    background: linear-gradient(45deg, #8e44ad, #9b59b6);
+    box-shadow: 0 2px 8px rgba(142, 68, 173, 0.3),
+                inset 0 1px 2px rgba(255, 255, 255, 0.2);
+}
+
+.powerup-button[data-rarity="legendary"] {
+    background: linear-gradient(45deg, #c0392b, #e74c3c);
+    box-shadow: 0 2px 12px rgba(231, 76, 60, 0.4),
+                inset 0 1px 3px rgba(255, 255, 255, 0.3);
+    animation: legendary-glow 2s infinite;
+}
+
+@keyframes legendary-glow {
+    0% {
+        box-shadow: 0 2px 12px rgba(231, 76, 60, 0.4),
+                    inset 0 1px 3px rgba(255, 255, 255, 0.3);
+    }
+    50% {
+        box-shadow: 0 2px 20px rgba(231, 76, 60, 0.6),
+                    inset 0 1px 5px rgba(255, 255, 255, 0.4);
+    }
+    100% {
+        box-shadow: 0 2px 12px rgba(231, 76, 60, 0.4),
+                    inset 0 1px 3px rgba(255, 255, 255, 0.3);
+    }
+}
+
+/* Стили для перезарядки */
+.powerup-button .cooldown {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.7);
+    transition: width 0.2s linear;
+}
+
+.powerup-button.on-cooldown {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.powerup-button.on-cooldown::after {
+    content: attr(data-cooldown);
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.powerup-button .material-icons-round[data-icon="monetization_on"] {
+    color: #ffd700;
+}
+
+.powerup-button .material-icons-round[data-icon="local_fire_department"] {
+    color: #4060ff;
+}
+
+.powerup-button:hover:not(.disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2),
+                inset 0 1px 3px rgba(255, 255, 255, 0.2);
+    filter: brightness(1.1);
+}
+
+.powerup-button:active:not(.disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1),
+                inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.powerup-button.disabled {
+    background: linear-gradient(45deg, #7f8c8d, #95a5a6);
+    cursor: not-allowed;
+    opacity: 0.7;
+    transform: none;
+}
+
+.powerup-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: 0.5s;
+}
+
+.powerup-button:hover:not(.disabled)::before {
+    left: 100%;
+}
+
+.powerup-button .material-icons-round {
+    font-size: 14px;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+}
+
+.powerup-active .piece {
+    cursor: not-allowed;
+}
+
+.powerup-active .powerup-target {
+    cursor: pointer;
+    animation: pulse 1s infinite;
+}
+
+.powerup-target:hover {
+    filter: brightness(1.2);
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Анимация получения монет */
+@keyframes coinGet {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-20px) scale(1.2);
+        opacity: 0;
+    }
+}
+
+.coin-animation {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    pointer-events: none;
+    transition: transform 1s ease-out, opacity 1s ease-out, left 1s ease-out, top 1s ease-out;
+    color: #FFD700;
+    font-weight: bold;
+    text-shadow: 0 0 3px #000;
+}
+
+.coin-animation .material-icons-round {
+    font-size: 24px;
+    color: #FFD700;
+    filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.5));
+}
+
+/* Добавляем медиа-запрос для адаптации под разные размеры экрана */
+@media screen and (max-height: 900px) {
+    .white-ui {
+        bottom: 10px;
+    }
+    
+    .black-ui {
+        top: 10px;
+    }
+    
+    .pieces-counter {
+        top: calc(50% + 390px);
+    }
+    
+    #board {
+        transform: translate(-50%, -50%) scale(0.92);
+    }
+    
+    #board:hover {
+        transform: translate(-50%, -50%) scale(0.94);
+    }
+    
+    .piece-info {
+        right: 20px;
+        width: 250px;
+        padding: 20px;
+    }
+}
+
+@media screen and (max-height: 800px) {
+    .white-ui {
+        bottom: 5px;
+    }
+    
+    .black-ui {
+        top: 5px;
+    }
+    
+    .pieces-counter {
+        top: calc(50% + 360px);
+    }
+    
+    #board {
+        transform: translate(-50%, -50%) scale(0.87);
+    }
+    
+    #board:hover {
+        transform: translate(-50%, -50%) scale(0.89);
+    }
+    
+    .piece-info {
+        right: 15px;
+        width: 230px;
+        padding: 18px;
+    }
+}
+
+@media screen and (max-height: 700px) {
+    .white-ui {
+        bottom: 5px;
+    }
+    
+    .black-ui {
+        top: 5px;
+    }
+    
+    .pieces-counter {
+        top: calc(50% + 330px);
+    }
+    
+    #board {
+        transform: translate(-50%, -50%) scale(0.82);
+    }
+    
+    #board:hover {
+        transform: translate(-50%, -50%) scale(0.84);
+    }
+    
+    .piece-info {
+        right: 10px;
+        width: 220px;
+        padding: 15px;
+    }
+}
+
+/* Дополнительные стили для элементов внутри активного UI */
+.active-player .player-name {
+    color: #ffffff;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+.active-player .coins {
+    color: #d4af37; /* Более яркий цвет для монет */
+}
+
+.trap {
+    position: absolute;
+    width: 30%;
+    height: 30%;
+    border-radius: 50%;
+    animation: trapPulse 2s infinite;
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.trap.white {
+    border: 2px dashed #ffffff;
+}
+
+.trap.white::before {
+    content: '⚡';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    color: #ffffff;
+}
+
+.trap.black {
+    border: 2px dashed #000000;
+}
+
+.trap.black::before {
+    content: '⚡';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    color: #000000;
+}
+
+.trap.triggered {
+    animation: trapTrigger 0.5s forwards;
+}
+
+@keyframes trapPulse {
+    0% { 
+        transform: scale(0.9);
+        opacity: 0.5;
+    }
+    50% { 
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+    100% { 
+        transform: scale(0.9);
+        opacity: 0.5;
+    }
+}
+
+@keyframes trapTrigger {
+    0% { 
+        transform: scale(1);
+        opacity: 0.7;
+    }
+    50% { 
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% { 
+        transform: scale(0);
+        opacity: 0;
+    }
+}
+
+.square.trap-target {
+    cursor: pointer;
+    position: relative;
+}
+
+.square.trap-target::after {
+    content: '⚡';
+    position: absolute;
+    font-size: 24px;
+    color: rgba(255, 68, 68, 0.5);
+    animation: trapTargetPulse 1s infinite;
+}
+
+@keyframes trapTargetPulse {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    50% { transform: scale(1.2); opacity: 0.8; }
+    100% { transform: scale(0.8); opacity: 0.5; }
+}
+
+.powerup-target {
+    position: relative;
+}
+
+.powerup-target::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border: 3px solid #ff4444;
+    border-radius: 50%;
+    animation: targetPulse 1s infinite;
+}
+
+@keyframes targetPulse {
+    0% { transform: scale(0.95); opacity: 0.7; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(0.95); opacity: 0.7; }
+}
+
+/* Обновленные стили для иконок */
+.material-icons-round {
+    font-family: 'Material Icons Round';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+.dynamic-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+#background-video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+    opacity: 1;
+    display: none;
+}
+
+body.in-game #background-video {
+    display: block;
+}
+
+.star {
+    position: absolute;
+    background: #ffffff;
+    border-radius: 50%;
+    animation: starFloat 3s linear infinite;
+    opacity: 0;
+    box-shadow: 0 0 4px #ffffff, 0 0 8px #ffffff;
+}
+
+.star.small {
+    width: 2px;
+    height: 2px;
+}
+
+.star.medium {
+    width: 3px;
+    height: 3px;
+}
+
+.star.large {
+    width: 4px;
+    height: 4px;
+}
+
+@keyframes starFloat {
+    0% {
+        transform: translateY(100vh) scale(0);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.8;
+    }
+    80% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(-100vh) scale(1);
+        opacity: 0;
+    }
+}
+
+.timer-display {
+    position: fixed;
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+    background-color: rgba(45, 45, 45, 0.9);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 1.2em;
+    font-weight: 600;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    min-width: 160px;
+    text-align: center;
+}
+
+.rounds-display {
+    position: fixed;
+    top: calc(50% + 70px);
+    left: 20px;
+    transform: translateY(0);
+    background-color: rgba(45, 45, 45, 0.9);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1.2em;
+    font-weight: 600;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    min-width: 160px;
+    text-align: center;
+}
+
+/* Добавляем анимацию мигания при оставшихся 10 секундах */
+@keyframes timerWarning {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.timer-warning {
+    animation: timerWarning 1s infinite;
+    color: #e74c3c;
+}
+
+/* Стили для оверлея паузы */
+.pause-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(240, 240, 240, 0.95);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.pause-message {
+    background-color: #f0f0f0;
+    border: 2px solid #b4b4b4;
+    border-radius: 10px;
+    padding: 30px;
+    text-align: center;
+    color: #2d2d2d;
+    box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.15);
+    animation: pulse 2s infinite ease-in-out;
+}
+
+.pause-message h2 {
+    margin: 0 0 20px 0;
+    font-size: 2em;
+    color: #2d2d2d;
+}
+
+.pause-message p {
+    margin: 0;
+    font-size: 1.2em;
+}
+
+.pause-message kbd {
+    background-color: #2d2d2d;
+    border: 2px solid #1a1a1a;
+    border-radius: 3px;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.15);
+    color: #fff;
+    display: inline-block;
+    font-size: 0.85em;
+    font-weight: 700;
+    line-height: 1;
+    padding: 3px 8px;
+    margin: 0 3px;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Стили для контейнера кнопок управления */
+.game-controls {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    z-index: 1000;
+}
+
+/* Общие стили для кнопок управления */
+.control-button {
+    width: 45px;
+    height: 45px;
+    border: 2px solid #b4b4b4;
+    border-radius: 6px;
+    background: #f0f0f0;
+    color: #2d2d2d;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.15);
+}
+
+.control-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.15);
+}
+
+.control-button:active {
+    transform: translateY(0);
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.15);
+}
+
+.control-button .material-icons-round {
+    font-size: 24px;
+}
+
+/* Специфичные стили для кнопки паузы */
+.control-button.pause-button {
+    background: #f0f0f0;
+}
+
+.control-button.menu-exit-button {
+    background-color: #e74c3c;
+}
+
+.control-button.sound-button {
+    background-color: #2ecc71;
+}
+
+.control-button.sound-button[data-muted="true"] {
+    background-color: #95a5a6;
+}
+
+.piece-info {
+    position: fixed;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 200px;
+    background: #a7a7a7;
+    border: 8px solid transparent;
+    border-radius: 12px;
+    padding: 44px;
+    box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.15);
+    display: none;
+    animation: slideIn 0.3s ease-out;
+    border-image: url('images/ui_peshki.png') 50 stretch;
+}
+
+.piece-info.visible {
+    display: block;
+}
+
+.piece-info-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #b4b4b4;
+}
+
+.piece-info-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    margin-right: 18px;
+    border: 2px solid;
+}
+
+.piece-info-icon.white {
+    background-color: #ffffff;
+    border-color: #e6e6e6;
+    box-shadow: inset -2px -2px 0 #f0f0f0;
+}
+
+.piece-info-icon.black {
+    background-color: #2d2d2d;
+    border-color: #1a1a1a;
+    box-shadow: inset -2px -2px 0 #1a1a1a;
+}
+
+.piece-info-title-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.piece-info-title {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #2d2d2d;
+}
+
+.piece-info-level {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #4CAF50;
+    padding: 2px 6px;
+    background: rgba(76, 175, 80, 0.1);
+    border-radius: 4px;
+}
+
+.piece-info-stats {
+    margin-bottom: 15px;
+}
+
+.piece-info-stat {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
+    position: relative;
+}
+
+.piece-info-stat .health-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 0, 0, 0.2);
+    border-radius: 0 0 6px 6px;
+    overflow: hidden;
+}
+
+.piece-info-stat .health-bar-fill {
+    height: 100%;
+    background: #ff4444;
+    width: 100%;
+    transition: width 0.3s ease;
+}
+
+.piece-info-stat-icon {
+    margin-right: 10px;
+    color: #2d2d2d;
+}
+
+.piece-info-stat-icon[data-icon="favorite"] {
+    color: #ff4444;
+}
+
+.piece-info-stat-icon[data-icon="gavel"] {
+    color: #ff9800;
+}
+
+.piece-info-stat-value {
+    font-weight: 500;
+    color: #2d2d2d;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#health-stat {
+    color: #ff4444;
+    font-weight: bold;
+}
+
+#attack-stat {
+    color: #ff9800;
+    font-weight: bold;
+}
+
+.piece-info-abilities {
+    margin-top: 15px;
+}
+
+.piece-info-ability {
+    padding: 8px;
+    margin-bottom: 8px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
+    font-size: 0.9em;
+    color: #2d2d2d;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50%) translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+}
+
+/* Стили для уведомлений */
+.notification {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    transform: none;
+    padding: 6px 10px;
+    background-color: rgba(51, 51, 51, 0.8);
+    color: white;
+    border-radius: 4px;
+    z-index: 9999;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    animation: slideDown 0.3s ease-out;
+    font-weight: 400;
+    font-size: 12px;
+    text-align: left;
+    min-width: 120px;
+    max-width: 200px;
+    backdrop-filter: blur(5px);
+    margin-bottom: 5px;
+}
+
+.notification + .notification {
+    margin-top: 35px;
+}
+
+.notification.info {
+    background-color: rgba(33, 150, 243, 0.8);
+    border-left: 2px solid #0D47A1;
+}
+
+.notification.success {
+    background-color: rgba(76, 175, 80, 0.8);
+    border-left: 2px solid #1B5E20;
+}
+
+.notification.error {
+    background-color: rgba(244, 67, 54, 0.8);
+    border-left: 2px solid #B71C1C;
+}
+
+.notification.warning {
+    background-color: rgba(255, 152, 0, 0.8);
+    border-left: 2px solid #EF6C00;
+    font-size: 12px;
+}
+
+.notification.special {
+    background: linear-gradient(135deg, rgba(255, 77, 77, 0.9), rgba(255, 0, 0, 0.8));
+    border-left: 2px solid #ff0000;
+    font-weight: bold;
+    font-size: 13px;
+    padding: 8px 12px;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+.notification.fade-out {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+}
+
+/* Стили для кликабельных иконок улучшения */
+.upgrade-icon {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.upgrade-icon:hover {
+    transform: scale(1.2);
+    color: #2dd36f !important;
+}
+
+.upgrade-icon:active {
+    transform: scale(0.9);
+}
+
+/* Стили для информации о пешке врага */
+.piece-info.enemy-info {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+    transform: translateX(0px);
+    animation: enemy-info-shake 0.5s ease-out;
+    top: 25%;
+}
+
+/* Стиль для подсветки вражеской пешки при просмотре информации */
+.piece.enemy-highlighted {
+    box-shadow: 0 0 10px #ff6b6b, 0 0 15px #ff6b6b;
+    z-index: 5;
+    animation: enemy-pulse 1.5s infinite;
+}
+
+/* Стиль для подсветки пешек, которые могут атаковать вражескую пешку */
+.piece.can-attack {
+    box-shadow: 0 0 10px #4CAF50, 0 0 15px #4CAF50;
+    z-index: 6;
+    animation: attack-pulse 1.5s infinite;
+}
+
+@keyframes attack-pulse {
+    0% { box-shadow: 0 0 10px #4CAF50, 0 0 15px #4CAF50; transform: scale(1); }
+    50% { box-shadow: 0 0 15px #4CAF50, 0 0 20px #4CAF50; transform: scale(1.1); }
+    100% { box-shadow: 0 0 10px #4CAF50, 0 0 15px #4CAF50; transform: scale(1); }
+}
+
+.piece-info-icon.enemy::after {
+    content: '👁️';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    font-size: 14px;
+    animation: pulse-icon 1.5s infinite;
+}
+
+/* Анимация пульсации для иконки врага */
+@keyframes pulse-icon {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.3);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Анимация дрожания для панели информации врага */
+@keyframes enemy-info-shake {
+    0% { transform: translateX(0); }
+    10% { transform: translateX(-5px); }
+    20% { transform: translateX(5px); }
+    30% { transform: translateX(-3px); }
+    40% { transform: translateX(3px); }
+    50% { transform: translateX(-2px); }
+    60% { transform: translateX(2px); }
+    70% { transform: translateX(-1px); }
+    80% { transform: translateX(1px); }
+    90% { transform: translateX(-1px); }
+    100% { transform: translateX(0); }
+}
+
+/* Стили для полоски здоровья вражеской пешки */
+.piece-info.enemy-info .health-bar-fill {
+    background: linear-gradient(to right, #ff6b6b, #ed5a5a);
+}
+
+/* Стили для заголовка вражеской пешки */
+.piece-info.enemy-info .piece-info-title {
+    color: #ff6b6b;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Стили для анимации атаки */
+.attack-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.attack-projectile {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: #ff4d4d;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 16px;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+    transform: translate(-50%, -50%);
+    z-index: 1001;
+}
+
+.hit-effect {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, rgba(255,77,77,0.7) 0%, rgba(255,77,77,0) 70%);
+    transform: translate(-50%, -50%) scale(0);
+    animation: hitExpand 0.5s ease-out forwards;
+    z-index: 1002;
+}
+
+@keyframes hitExpand {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0;
+    }
+}
+
+/* Стили для оглушенных пешек */
+.piece.stunned {
+    filter: grayscale(0.7) brightness(0.8);
+    position: relative;
+    pointer-events: none;
+}
+
+.stun-effect {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.stun-effect::before {
+    content: '💫';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    animation: stunRotate 2s linear infinite;
+    text-shadow: 0 0 10px rgba(243, 156, 18, 0.8);
+}
+
+.stun-effect::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    border: 2px dashed #f39c12;
+    animation: stunPulse 1.5s infinite;
+    box-shadow: 0 0 15px rgba(243, 156, 18, 0.4);
+}
+
+@keyframes stunRotate {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes stunPulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.8;
+        box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.7);
+    }
+    70% {
+        transform: scale(1.2);
+        opacity: 0.6;
+        box-shadow: 0 0 0 10px rgba(243, 156, 18, 0);
+    }
+    100% {
+        transform: scale(0.8);
+        opacity: 0.8;
+        box-shadow: 0 0 0 0 rgba(243, 156, 18, 0);
+    }
+}
+
+.stun-effect.fade-out {
+    animation: stunFadeOut 0.5s forwards;
+}
+
+@keyframes stunFadeOut {
+    0% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0) rotate(360deg);
+    }
+}
+
+/* Стили для уровня пешки на доске */
+.piece-level {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 16px;
+    height: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    z-index: 4;
+}
+
+/* Стили для пешки с максимальным уровнем (рыцарь) */
+.piece:has(.knight-icon) {
+    transform-origin: center;
+    background-image: radial-gradient(circle at center, rgba(156, 39, 176, 0.1) 0%, rgba(156, 39, 176, 0) 70%);
+    box-shadow: 0 0 10px rgba(156, 39, 176, 0.5);
+}
+
+/* Анимация для пешки при получении статуса рыцаря */
+@keyframes knightTransformation {
+    0% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+    50% {
+        transform: scale(1.2);
+        filter: brightness(1.5);
+        box-shadow: 0 0 20px rgba(156, 39, 176, 0.8);
+    }
+    100% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+}
+
+.knight-transformation {
+    animation: knightTransformation 1s ease-in-out;
+}
+
+/* Обновляем стили для белых и черных пешек с максимальным уровнем */
+.piece.white:has(.knight-icon) {
+    background: url('images/wp.png') no-repeat center center;
+    background-size: cover;
+    border: 2px solid #e6e6e6;
+    box-shadow: 0 0 10px rgba(156, 39, 176, 0.5),
+                inset -4px -4px 10px #f0f0f0,
+                inset 4px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.piece.black:has(.knight-icon) {
+    background: url('images/bp.png') no-repeat center center;
+    background-size: cover;
+    border: 2px solid #1a1a1a;
+    box-shadow: 0 0 10px rgba(156, 39, 176, 0.5),
+                inset -4px -4px 10px #1a1a1a,
+                inset 4px 4px 10px rgba(255, 255, 255, 0.1);
+}
+
+/* Стили для заголовка счетчика */
+.counter-title {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    color: #4CAF50;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0px 0px 5px rgba(76, 175, 80, 0.5);
+}
+
+/* Стили для метки счетчика */
+.counter-label {
+    font-size: 16px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Обновленные стили для значения счетчика */
+.counter-value {
+    font-size: 20px;
+    font-weight: 700;
+    min-width: 30px;
+    text-shadow: 0px 0px 5px rgba(255, 255, 255, 0.5);
+}
+
+/* Стили для отображения статистики пешек */
+.piece-stats {
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    color: white;
+    white-space: nowrap;
+    z-index: 2;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15),
+                0 2px 4px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(3px);
+    min-width: 24px;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.piece-stats:hover {
+    background: rgba(0, 0, 0, 0.8);
+    transform: translateX(-50%) scale(1.05);
+}
+
+.piece-stats .health {
+    color: #ff4444;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+    font-weight: 500;
+}
+
+/* Анимация мечей для пешек, которые можно атаковать */
+.can-be-attacked {
+    position: relative;
+}
+
+.can-be-attacked::before {
+    content: '⚔️';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    animation: swordsBounce 1s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 2;
+}
+
+@keyframes swordsBounce {
+    0% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-5px); }
+    100% { transform: translateX(-50%) translateY(0); }
+}
+
+.raindrop {
+    position: absolute;
+    top: -20px;
+    width: 2px;
+    background: linear-gradient(transparent, rgba(255, 255, 255, 0.5));
+    border-radius: 50%;
+    filter: blur(1px);
+    animation: rain linear infinite;
+    pointer-events: none;
+}
+
+@keyframes rain {
+    0% {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.5;
+    }
+    90% {
+        opacity: 0.5;
+    }
+    100% {
+        transform: translateY(100vh);
+        opacity: 0;
+    }
+}
+
+/* Анимация тумана */
+.fog-container {
+    display: none;
+}
+
+.fog {
+    display: none;
+}
+
+.fog-2 {
+    display: none;
+}
+
+.fog-3 {
+    display: none;
+}
+
+@keyframes fogAnimation {
+    0% {
+        display: none;
+    }
+    100% {
+        display: none;
+    }
+}
+
+/* Стили для маны */
+.mana {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: rgba(64, 96, 255, 0.2);
+    border-radius: 12px;
+    margin-left: 8px;
+    transition: all 0.3s ease;
+}
+
+.mana-icon {
+    color: #4060ff;
+    font-size: 18px;
+}
+
+.mana-text {
+    color: #4060ff;
+    font-weight: bold;
+}
+
+.mana.updated {
+    animation: pulse 0.3s ease-in-out;
+}
+
+/* Стили для окна улучшений */
+.upgrade-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.upgrade-window {
+    background: linear-gradient(45deg, #2c3e50, #3498db);
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.upgrade-window h2 {
+    color: white;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.upgrade-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    padding: 10px;
+}
+
+.upgrade-option {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.upgrade-option:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.upgrade-option h3 {
+    color: white;
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.upgrade-option p {
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+#pieces-counter {
+    position: fixed;
+    top: calc(50% + 140px);
+    left: 20px;
+    transform: translateY(0);
+    background-color: rgba(45, 45, 45, 0.9);
+    padding: 10px 20px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    min-width: 160px;
+}
+
+.counter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    font-size: 1.1em;
+    font-weight: 600;
+    padding: 5px 0;
+}
+
+.counter-value {
+    min-width: 24px;
+    text-align: right;
+}
+
+.black-counter::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    background-color: #333;
+    border-radius: 50%;
+    border: 2px solid #666;
+}
+
+.white-counter::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    background-color: #fff;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+}
+
+/* Стили для клеток, доступных для установки ловушки */
+.trap-target {
+    position: relative;
+    cursor: pointer;
+}
+
+.trap-target::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 0, 0, 0.2);
+    border: 2px solid rgba(255, 0, 0, 0.5);
+    border-radius: 4px;
+    animation: pulse-red 1.5s infinite;
+    pointer-events: none;
+}
+
+@keyframes pulse-red {
+    0% {
+        transform: scale(0.95);
+        opacity: 0.6;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(0.95);
+        opacity: 0.6;
+    }
+}
+
+/* Стили для клеток, доступных для воскрешения */
+.resurrect-target,
+.resurrect-available {
+    position: relative;
+    cursor: pointer;
+}
+
+.resurrect-target::before,
+.resurrect-available::before {
+    content: '';
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    height: 90%;
+    background-color: rgba(46, 204, 113, 0.4);
+    border: 2px solid #2ecc71;
+    border-radius: 5px;
+    z-index: 1;
+    pointer-events: none;
+    animation: pulse-green 1.5s infinite;
+}
+
+@keyframes pulse-green {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
+    }
+    
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(46, 204, 113, 0);
+    }
+    
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+    }
+}
+
+/* Стили для недоступных навыков в магазине */
+.shop-item.not-enough-coins {
+    opacity: 0.7;
+    filter: grayscale(0.8);
+    cursor: not-allowed;
+}
+
+.shop-item.not-enough-coins .shop-item-header,
+.shop-item.not-enough-coins .shop-item-description {
+    opacity: 0.7;
+}
+
+.shop-item.not-enough-coins .shop-buy-button {
+    background: linear-gradient(45deg, #7f8c8d, #95a5a6) !important;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    opacity: 0.7;
+}
+
+.shop-item.not-enough-coins .shop-buy-button:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+}
+
+.shop-item.not-enough-coins .shop-item-cost {
+    color: #ff4444;
+}
+
+.shop-item.not-enough-coins .material-icons-round {
+    opacity: 0.5;
+}
+
+/* Добавляем стили для кнопки покупки */
+.shop-buy-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    background: linear-gradient(45deg, #2ecc71, #27ae60);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.shop-buy-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.shop-buy-button:disabled {
+    background: linear-gradient(45deg, #7f8c8d, #95a5a6);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Стили для магазина навыков */
+.shop-item {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.shop-item-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.shop-item-header .material-icons-round {
+    font-size: 18px;
+}
+
+.shop-item-header h3 {
+    font-size: 14px;
+    margin: 0;
+    color: white;
+}
+
+.shop-item-description {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 8px;
+    line-height: 1.3;
+}
+
+.shop-item-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.shop-item-cost {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #ffd700;
+}
+
+.shop-item-cost .material-icons-round {
+    font-size: 14px;
+}
+
+.shop-content {
+    max-width: 600px;
+    width: 90%;
+    background: rgba(45, 45, 45, 0.95);
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.shop-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.shop-header h2 {
+    font-size: 16px;
+    margin: 0;
+    color: white;
+}
+
+.shop-close-button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.shop-close-button .material-icons-round {
+    font-size: 18px;
+}
+
+.shop-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* Стили для скроллбара в магазине */
+.shop-items::-webkit-scrollbar {
+    width: 6px;
+}
+
+.shop-items::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.shop-items::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.shop-items::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
