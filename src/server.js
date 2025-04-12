@@ -18,8 +18,8 @@ const httpServer = createServer(app);
 // Настройка CORS для разных окружений
 const allowedOrigins = [
   process.env.CLIENT_URL || "http://localhost:3000",
-  "https://your-app-name.vercel.app", // Добавьте URL вашего клиента на Vercel
-  "https://your-app-name.netlify.app"  // Добавьте URL вашего клиента на Netlify
+  "https://your-app-name.vercel.app",
+  "https://your-app-name.netlify.app"
 ];
 
 // Настройка Socket.IO с CORS
@@ -29,15 +29,13 @@ const io = new Server(httpServer, {
     methods: ["GET", "POST"],
     credentials: true
   },
-  transports: ['websocket', 'polling'] // Поддержка WebSocket и long-polling
+  transports: ['websocket', 'polling']
 });
 
 // Настройка CORS для Express
 app.use(cors({
   origin: function(origin, callback) {
-    // Разрешаем запросы без origin (например, от мобильных приложений)
     if (!origin) return callback(null, true);
-    
     if (allowedOrigins.indexOf(origin) === -1) {
       return callback(new Error('CORS policy violation'), false);
     }
@@ -48,18 +46,36 @@ app.use(cors({
 
 app.use(express.json());
 
-// Serve static files
-app.use(express.static('public'));
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, '../public')));
 
-// Serve index.html for root route
+// Routes for HTML pages
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../index.html'));
+  res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-// Routes
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/login.html'));
+});
+
+app.get('/game', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/game.html'));
+});
+
+// API Routes
 app.use('/api', gameRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/matches', matchRoutes);
+
+// Catch-all route for SPA
+app.get('*', (req, res) => {
+  // Если запрос на HTML страницу - отправляем index.html
+  if (req.accepts('html')) {
+    res.sendFile(path.join(__dirname, '../public/index.html'));
+  } else {
+    res.status(404).json({ message: 'Not Found' });
+  }
+});
 
 // MongoDB connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/shadow-checkers';
