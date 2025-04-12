@@ -74,6 +74,7 @@
     </div>
 
     <script>
+    // Функция переключения форм
     function toggleForms() {
         const loginForm = document.getElementById('loginForm');
         const registerForm = document.getElementById('registerForm');
@@ -81,6 +82,26 @@
         loginForm.classList.toggle('active');
         registerForm.classList.toggle('active');
     }
+
+    // Добавляем обработчики событий при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+
+        if (loginForm) {
+            loginForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                handleLogin(event);
+            });
+        }
+
+        if (registerForm) {
+            registerForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                handleRegister(event);
+            });
+        }
+    });
     </script>
     <script src="/js/auth.js"></script>
 </body>
