@@ -3,60 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вход - Shadow Checkers</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>Shadow Checkers - Авторизация</title>
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
-<body class="bg-gray-100">
-    <div class="min-h-screen flex items-center justify-center">
-        <div class="bg-white p-8 rounded-lg shadow-md w-96">
-            <h1 class="text-2xl font-bold mb-6 text-center">Вход в игру</h1>
+<body>
+    <div class="container">
+        <div class="card fade-in">
+            <h1 class="game-title text-center mb-4">Shadow Checkers</h1>
             
-            <div id="error-message" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"></div>
-            
-            <form id="login-form" class="space-y-4">
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                    <input type="email" id="email" name="email" required
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            <form id="loginForm" class="fade-in">
+                <div class="form-group">
+                    <label class="form-label" for="username">Имя пользователя</label>
+                    <input type="text" id="username" name="username" class="form-input" 
+                           required minlength="3" maxlength="30">
                 </div>
                 
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700">Пароль</label>
-                    <input type="password" id="password" name="password" required
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <div class="form-group">
+                    <label class="form-label" for="password">Пароль</label>
+                    <input type="password" id="password" name="password" class="form-input"
+                           required minlength="6">
                 </div>
                 
-                <button type="submit"
-                    class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                    Войти
-                </button>
+                <div class="game-controls">
+                    <button type="submit" class="btn btn-primary">Войти</button>
+                    <button type="button" class="btn btn-secondary" onclick="handleSubmit(event, false)">
+                        Зарегистрироваться
+                    </button>
+                </div>
             </form>
-            
-            <p class="mt-4 text-center text-sm text-gray-600">
-                Нет аккаунта? <a href="/register.html" class="text-blue-500 hover:text-blue-700">Зарегистрироваться</a>
-            </p>
         </div>
     </div>
 
     <script src="/js/auth.js"></script>
-    <script>
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const errorMessage = document.getElementById('error-message');
-            errorMessage.classList.add('hidden');
-            
-            try {
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-                
-                await authService.login(email, password);
-                window.location.href = '/game.html';
-            } catch (error) {
-                errorMessage.textContent = error.message;
-                errorMessage.classList.remove('hidden');
-            }
-        });
-    </script>
 </body>
 </html> 

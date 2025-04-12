@@ -4,221 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shadow Checkers - Игра</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
-<body class="bg-gray-100">
-    <div class="min-h-screen p-4">
-        <!-- Верхняя панель -->
-        <div class="flex justify-between items-center mb-4">
-            <div class="text-lg font-bold" id="player-info">
-                Игрок: <span id="username"></span>
+<body>
+    <div class="game-container fade-in">
+        <div class="game-header">
+            <div class="player-info">
+                Игрок: <span id="playerName"></span>
             </div>
-            <button onclick="authService.logout()" 
-                class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
-                Выйти
-            </button>
+            <h1 class="game-title">Игровая сессия</h1>
+            <button class="btn btn-danger" onclick="authService.logout()">Выйти</button>
         </div>
 
-        <!-- Основной контент -->
-        <div class="flex gap-4">
-            <!-- Игровая доска -->
-            <div class="bg-white p-4 rounded-lg shadow-md flex-1">
-                <div id="game-status" class="text-center mb-4 text-lg font-bold">
-                    Нажмите "Найти игру" чтобы начать
-                </div>
-                
-                <div id="board" class="grid grid-cols-8 gap-1 w-96 mx-auto">
-                    <!-- Клетки доски будут добавлены через JavaScript -->
-                </div>
-            </div>
-
-            <!-- Панель управления -->
-            <div class="bg-white p-4 rounded-lg shadow-md w-64">
-                <h2 class="text-xl font-bold mb-4">Управление</h2>
-                
-                <div class="space-y-4">
-                    <button id="find-game-btn" onclick="startSearch()"
-                        class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
-                        Найти игру
-                    </button>
-                    
-                    <button id="surrender-btn" onclick="surrender()" disabled
-                        class="w-full bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600">
-                        Сдаться
-                    </button>
-                </div>
-
-                <div id="game-info" class="mt-4">
-                    <div id="current-turn" class="text-center font-bold"></div>
-                    <div id="your-color" class="text-center mt-2"></div>
-                </div>
-            </div>
+        <div class="game-board" id="gameBoard">
+            <!-- Здесь будет отрисовываться игровое поле -->
         </div>
 
-        <!-- Сообщения -->
-        <div id="message" class="fixed bottom-4 right-4 p-4 rounded shadow-lg hidden"></div>
+        <div class="game-controls">
+            <button class="btn btn-primary" id="moveButton" onclick="sendMove()">Сделать ход</button>
+        </div>
     </div>
 
+    <!-- Подключаем скрипты -->
+    <script src="/socket.io/socket.io.js"></script>
     <script src="/js/auth.js"></script>
-    <script src="/js/game-socket.js"></script>
+    <script src="/js/game.js"></script>
+
     <script>
-        // Проверка аутентификации
-        if (!authService.isAuthenticated()) {
-            window.location.href = '/login.html';
-        }
-
-        const user = authService.getUser();
-        document.getElementById('username').textContent = user.username;
-
-        let selectedCell = null;
-        let isMyTurn = false;
-
-        // Инициализация доски
-        function initializeBoard() {
-            const board = document.getElementById('board');
-            board.innerHTML = '';
+        // Отображаем имя игрока при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            // Проверяем авторизацию
+            authService.checkAuth();
             
-            for (let i = 0; i < 8; i++) {
-                for (let j = 0; j < 8; j++) {
-                    const cell = document.createElement('div');
-                    cell.className = `w-12 h-12 ${(i + j) % 2 === 0 ? 'bg-gray-200' : 'bg-gray-600'}`;
-                    cell.dataset.row = i;
-                    cell.dataset.col = j;
-                    cell.onclick = () => handleCellClick(cell);
-                    board.appendChild(cell);
-                }
+            // Отображаем имя игрока
+            const playerName = authService.getUsername();
+            if (playerName) {
+                document.getElementById('playerName').textContent = playerName;
             }
-        }
-
-        // Обновление доски
-        function updateBoard(boardState) {
-            const cells = document.getElementById('board').children;
-            
-            for (let i = 0; i < 8; i++) {
-                for (let j = 0; j < 8; j++) {
-                    const cell = cells[i * 8 + j];
-                    const piece = boardState[i][j];
-                    
-                    // Очищаем содержимое
-                    cell.innerHTML = '';
-                    
-                    if (piece) {
-                        const pieceDiv = document.createElement('div');
-                        pieceDiv.className = `w-10 h-10 rounded-full m-1 ${
-                            piece.color === 'white' ? 'bg-white' : 'bg-black'
-                        } border-2 border-gray-400`;
-                        
-                        if (piece.isKing) {
-                            pieceDiv.innerHTML = '👑';
-                            pieceDiv.className += ' flex items-center justify-center text-yellow-500';
-                        }
-                        
-                        cell.appendChild(pieceDiv);
-                    }
-                }
-            }
-        }
-
-        // Обработка клика по клетке
-        function handleCellClick(cell) {
-            if (!isMyTurn) return;
-            
-            const row = parseInt(cell.dataset.row);
-            const col = parseInt(cell.dataset.col);
-
-            if (selectedCell) {
-                // Пытаемся сделать ход
-                gameSocket.makeMove(
-                    { row: parseInt(selectedCell.dataset.row), col: parseInt(selectedCell.dataset.col) },
-                    { row, col }
-                );
-                
-                selectedCell.classList.remove('ring-2', 'ring-blue-500');
-                selectedCell = null;
-            } else {
-                // Выбираем шашку
-                const piece = gameSocket.color === 'white' ? 'bg-white' : 'bg-black';
-                if (cell.firstChild && cell.firstChild.classList.contains(piece)) {
-                    selectedCell = cell;
-                    cell.classList.add('ring-2', 'ring-blue-500');
-                }
-            }
-        }
-
-        // Показ сообщения
-        function showMessage(text, type = 'info') {
-            const messageDiv = document.getElementById('message');
-            messageDiv.textContent = text;
-            messageDiv.className = `fixed bottom-4 right-4 p-4 rounded shadow-lg ${
-                type === 'error' ? 'bg-red-500' : 'bg-green-500'
-            } text-white`;
-            messageDiv.classList.remove('hidden');
-            
-            setTimeout(() => {
-                messageDiv.classList.add('hidden');
-            }, 3000);
-        }
-
-        // Поиск игры
-        function startSearch() {
-            document.getElementById('find-game-btn').disabled = true;
-            document.getElementById('game-status').textContent = 'Поиск игры...';
-            gameSocket.findGame();
-        }
-
-        // Сдаться
-        function surrender() {
-            gameSocket.surrender();
-        }
-
-        // Инициализация Socket.IO
-        try {
-            gameSocket.connect();
-            
-            gameSocket.setCallbacks({
-                onGameFound: (gameData) => {
-                    document.getElementById('game-status').textContent = 'Игра началась!';
-                    document.getElementById('your-color').textContent = `Ваш цвет: ${
-                        gameData.yourColor === 'white' ? 'белый' : 'черный'
-                    }`;
-                    document.getElementById('surrender-btn').disabled = false;
-                    updateBoard(gameData.board);
-                },
-                
-                onGameState: (gameState) => {
-                    updateBoard(gameState.board);
-                    isMyTurn = gameState.currentTurn === user.id;
-                    document.getElementById('current-turn').textContent = 
-                        isMyTurn ? 'Ваш ход' : 'Ход противника';
-                },
-                
-                onGameEnded: (data) => {
-                    const isWinner = data.winner === user.id;
-                    document.getElementById('game-status').textContent = 
-                        isWinner ? 'Вы победили!' : 'Вы проиграли!';
-                    document.getElementById('surrender-btn').disabled = true;
-                    document.getElementById('find-game-btn').disabled = false;
-                    showMessage(
-                        isWinner ? 'Поздравляем с победой!' : 'Игра окончена',
-                        isWinner ? 'info' : 'error'
-                    );
-                },
-                
-                onError: (error) => {
-                    showMessage(error, 'error');
-                },
-                
-                onWaiting: () => {
-                    document.getElementById('game-status').textContent = 'Ожидание противника...';
-                }
-            });
-        } catch (error) {
-            showMessage(error.message, 'error');
-        }
-
-        // Инициализация доски при загрузке
-        initializeBoard();
+        });
     </script>
 </body>
 </html> 
