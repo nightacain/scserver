@@ -39,14 +39,14 @@ class AuthService {
     }
   }
 
-  async login(email, password) {
+  async login(username, password) {
     try {
       const response = await fetch(`${this.baseUrl}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ username, password })
       });
 
       const data = await response.json();
@@ -55,7 +55,7 @@ class AuthService {
         throw new Error(data.message || 'Ошибка при входе');
       }
 
-      this.setAuthData(data.token, email);
+      this.setAuthData(data.token, username);
       window.location.href = '/game.html';
       return data;
     } catch (error) {
@@ -138,25 +138,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const password = document.getElementById('password').value;
 
       try {
-        const response = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ username, password })
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          localStorage.setItem('token', data.token);
-          window.location.href = '/game.html';
-        } else {
-          alert(data.message || 'Ошибка входа');
-        }
+        await authService.login(username, password);
       } catch (error) {
         console.error('Ошибка:', error);
-        alert('Произошла ошибка при входе');
       }
     });
   }
@@ -178,25 +162,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       try {
-        const response = await fetch('/api/auth/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ username, email, password })
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          alert('Регистрация успешна! Теперь вы можете войти.');
-          window.location.href = '/login.html';
-        } else {
-          alert(data.message || 'Ошибка регистрации');
-        }
+        await authService.register(username, email, password);
       } catch (error) {
         console.error('Ошибка:', error);
-        alert('Произошла ошибка при регистрации');
       }
     });
   }
