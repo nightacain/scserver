@@ -3,14 +3,14 @@ class AuthService {
     this.baseUrl = '/api/auth';
   }
 
-  async register(username, password) {
+  async register(username, email, password) {
     try {
       const response = await fetch(`${this.baseUrl}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, email, password })
       });
 
       const data = await response.json();
@@ -22,6 +22,7 @@ class AuthService {
       alert('Регистрация успешна! Теперь вы можете войти.');
       return data;
     } catch (error) {
+      console.error('Ошибка при регистрации:', error);
       throw error;
     }
   }
@@ -101,11 +102,13 @@ const authService = new AuthService();
 async function handleSubmit(event, isLogin = true) {
   event.preventDefault();
   
-  const username = document.getElementById('username').value;
-  const password = document.getElementById('password').value;
+  const prefix = isLogin ? 'login-' : 'register-';
+  const username = document.getElementById(prefix + 'username').value;
+  const password = document.getElementById(prefix + 'password').value;
+  const email = isLogin ? null : document.getElementById('register-email').value;
 
   // Валидация полей
-  if (!username || !password) {
+  if (!username || !password || (!isLogin && !email)) {
     alert('Пожалуйста, заполните все поля');
     return;
   }
@@ -115,14 +118,20 @@ async function handleSubmit(event, isLogin = true) {
     return;
   }
 
+  if (!isLogin && !email.match(/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/)) {
+    alert('Пожалуйста, введите корректный email');
+    return;
+  }
+
   try {
     if (isLogin) {
       await authService.login(username, password);
       window.location.href = '/game.html';
     } else {
-      await authService.register(username, password);
-      // После регистрации оставляем на странице логина
-      document.getElementById('loginForm').reset();
+      await authService.register(username, email, password);
+      // После успешной регистрации показываем форму входа
+      toggleForms();
+      document.getElementById('registerForm').reset();
     }
   } catch (error) {
     alert(error.message);
