@@ -134,8 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Найдена форма входа');
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
 
       try {
         await authService.login(username, password);
@@ -151,15 +151,9 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Найдена форма регистрации');
     registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const username = document.getElementById('username').value;
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const confirmPassword = document.getElementById('confirmPassword').value;
-
-      if (password !== confirmPassword) {
-        alert('Пароли не совпадают');
-        return;
-      }
+      const username = document.getElementById('register-username').value;
+      const email = document.getElementById('register-email').value;
+      const password = document.getElementById('register-password').value;
 
       try {
         await authService.register(username, email, password);
@@ -171,13 +165,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Проверка авторизации на защищенных страницах
   const currentPage = window.location.pathname;
-  const publicPages = ['/login.html', '/register.html', '/index.html'];
+  const publicPages = ['/login.html', '/index.html', '/'];
   
   if (!publicPages.includes(currentPage)) {
     console.log('Проверка авторизации для защищенной страницы:', currentPage);
     authService.checkAuth().then(isAuth => {
       if (!isAuth) {
-        window.location.href = '/login.html';
+        window.location.href = '/index.html';
       }
     });
   }
