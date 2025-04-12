@@ -1,7 +1,7 @@
 // Базовый URL API
 const API_URL = window.location.hostname === 'localhost' 
   ? 'http://localhost:3000/api' 
-  : 'https://your-render-domain.onrender.com/api';
+  : 'https://scserver-1.onrender.com/api';
 
 // Функция для отображения ошибок
 function showError(message) {
@@ -132,17 +132,12 @@ if (window.location.pathname !== '/login.html' &&
 
 class AuthService {
   constructor() {
-    this.baseUrl = window.location.origin + '/api/auth';
+    this.baseUrl = API_URL;
   }
 
   async register(username, email, password) {
     try {
-      console.log('Отправка запроса на регистрацию:', {
-        url: `${this.baseUrl}/register`,
-        body: { username, email, password }
-      });
-
-      const response = await fetch(`${this.baseUrl}/register`, {
+      const response = await fetch(`${this.baseUrl}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -150,34 +145,30 @@ class AuthService {
         body: JSON.stringify({ username, email, password })
       });
 
+      const data = await response.json();
+      
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Ответ сервера:', errorText);
-        try {
-          const errorData = JSON.parse(errorText);
-          throw new Error(errorData.message || 'Ошибка при регистрации');
-        } catch (e) {
-          throw new Error(`Ошибка при регистрации: ${errorText}`);
-        }
+        throw new Error(data.message || 'Ошибка при регистрации');
       }
 
-      const data = await response.json();
-      alert('Регистрация успешна! Теперь вы можете войти.');
+      this.setAuthData(data.token, username);
+      window.location.href = '/game.html';
       return data;
     } catch (error) {
       console.error('Ошибка при регистрации:', error);
+      showError(error.message);
       throw error;
     }
   }
 
-  async login(username, password) {
+  async login(email, password) {
     try {
-      const response = await fetch(`${this.baseUrl}/login`, {
+      const response = await fetch(`${this.baseUrl}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ email, password })
       });
 
       const data = await response.json();
@@ -186,18 +177,18 @@ class AuthService {
         throw new Error(data.message || 'Ошибка при входе');
       }
 
-      this.setAuthData(data.token, username);
-      
+      this.setAuthData(data.token, email);
+      window.location.href = '/game.html';
       return data;
     } catch (error) {
+      showError(error.message);
       throw error;
     }
   }
 
   logout() {
     this.clearAuthData();
-    
-    window.location.href = '/index.html';
+    window.location.href = '/login.html';
   }
 
   setAuthData(token, username) {
@@ -223,18 +214,22 @@ class AuthService {
     return !!token;
   }
 
-  checkAuth() {
-    const currentPage = window.location.pathname;
-    const isAuth = this.isAuthenticated();
-
-    if (!isAuth && (currentPage === '/game.html' || currentPage === '/index.html')) {
-      window.location.href = '/login.html';
-      return;
+  async checkAuth() {
+    const token = this.getToken();
+    if (!token) {
+      return false;
     }
-    
-    if (isAuth && currentPage === '/login.html') {
-      window.location.href = '/game.html';
-      return;
+    try {
+      const response = await fetch(`${this.baseUrl}/auth/verify`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('Ошибка проверки авторизации:', error);
+      return false;
     }
   }
 }
@@ -245,60 +240,58 @@ const authService = new AuthService();
 async function handleLogin(event) {
   event.preventDefault();
   
-  const username = document.getElementById('login-username').value;
-  const password = document.getElementById('login-password').value;
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
 
-  // Валидация полей
-  if (!username || !password) {
-    alert('Пожалуйста, заполните все поля');
-    return;
-  }
-
-  if (password.length < 6) {
-    alert('Пароль должен быть не менее 6 символов');
+  if (!email || !password) {
+    showError('Пожалуйста, заполните все поля');
     return;
   }
 
   try {
-    await authService.login(username, password);
-    window.location.href = '/game.html';
+    await authService.login(email, password);
   } catch (error) {
-    alert(error.message);
+    console.error('Ошибка входа:', error);
   }
 }
 
 async function handleRegister(event) {
   event.preventDefault();
   
-  const username = document.getElementById('register-username').value;
-  const email = document.getElementById('register-email').value;
-  const password = document.getElementById('register-password').value;
+  const username = document.getElementById('username').value;
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
 
-  // Валидация полей
-  if (!username || !password || !email) {
-    alert('Пожалуйста, заполните все поля');
+  if (!username || !email || !password || !confirmPassword) {
+    showError('Пожалуйста, заполните все поля');
     return;
   }
 
-  if (password.length < 6) {
-    alert('Пароль должен быть не менее 6 символов');
-    return;
-  }
-
-  if (!email.match(/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/)) {
-    alert('Пожалуйста, введите корректный email');
+  if (password !== confirmPassword) {
+    showError('Пароли не совпадают');
     return;
   }
 
   try {
     await authService.register(username, email, password);
-    // После успешной регистрации показываем форму входа
-    toggleForms();
-    document.getElementById('registerForm').reset();
   } catch (error) {
-    alert(error.message);
+    console.error('Ошибка регистрации:', error);
   }
 }
+
+// Автоматическая проверка авторизации на защищенных страницах
+(async () => {
+  const currentPage = window.location.pathname;
+  const publicPages = ['/login.html', '/register.html'];
+  
+  if (!publicPages.includes(currentPage)) {
+    const isAuth = await authService.checkAuth();
+    if (!isAuth) {
+      window.location.href = '/login.html';
+    }
+  }
+})();
 
 // Добавляем обработчики событий при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {

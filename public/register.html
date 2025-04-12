@@ -53,7 +53,7 @@
 <body>
     <div class="auth-container">
         <img src="/images/logo.png" alt="Шашки" class="auth-logo">
-        <form id="registerForm" onsubmit="event.preventDefault(); register();">
+        <form id="registerForm" onsubmit="handleRegister(event)">
             <input type="text" id="username" class="auth-input" placeholder="Имя пользователя" required>
             <input type="email" id="email" class="auth-input" placeholder="Email" required>
             <input type="password" id="password" class="auth-input" placeholder="Пароль" required>
