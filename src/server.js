@@ -10,6 +10,7 @@ const matchRoutes = require('./routes/matchRoutes');
 const GameSessionManager = require('./services/GameSessionManager');
 const matchController = require('./controllers/matchController');
 const jwt = require('jsonwebtoken');
+const path = require('path');
 
 const app = express();
 const httpServer = createServer(app);
@@ -46,6 +47,14 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// Serve static files
+app.use(express.static('public'));
+
+// Serve index.html for root route
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../index.html'));
+});
 
 // Routes
 app.use('/api', gameRoutes);
