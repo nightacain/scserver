@@ -2,10 +2,10 @@
   "name": "shadow-checkers",
   "version": "1.0.0",
   "description": "Онлайн игра в шашки с авторизацией",
-  "main": "server.js",
+  "main": "src/server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -13,9 +13,10 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
-    "mongoose": "^7.0.3"
+    "mongoose": "^7.0.3",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"
   }
-} 
+}
