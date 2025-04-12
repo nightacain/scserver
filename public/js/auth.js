@@ -236,12 +236,29 @@ class AuthService {
 
 const authService = new AuthService();
 
-// Функции-обработчики для форм
+// Функции-обработчики форм
+function getFormElement(id) {
+  const element = document.getElementById(id);
+  if (!element) {
+    console.error(`Элемент с id '${id}' не найден`);
+    return null;
+  }
+  return element;
+}
+
 async function handleLogin(event) {
-  event.preventDefault();
+  if (event) event.preventDefault();
   
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
+  const emailElement = getFormElement('email');
+  const passwordElement = getFormElement('password');
+  
+  if (!emailElement || !passwordElement) {
+    showError('Ошибка: форма входа не найдена');
+    return;
+  }
+
+  const email = emailElement.value.trim();
+  const password = passwordElement.value.trim();
 
   if (!email || !password) {
     showError('Пожалуйста, заполните все поля');
@@ -256,12 +273,22 @@ async function handleLogin(event) {
 }
 
 async function handleRegister(event) {
-  event.preventDefault();
+  if (event) event.preventDefault();
   
-  const username = document.getElementById('username').value;
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-  const confirmPassword = document.getElementById('confirmPassword').value;
+  const usernameElement = getFormElement('username');
+  const emailElement = getFormElement('email');
+  const passwordElement = getFormElement('password');
+  const confirmPasswordElement = getFormElement('confirmPassword');
+  
+  if (!usernameElement || !emailElement || !passwordElement || !confirmPasswordElement) {
+    showError('Ошибка: форма регистрации не найдена');
+    return;
+  }
+
+  const username = usernameElement.value.trim();
+  const email = emailElement.value.trim();
+  const password = passwordElement.value.trim();
+  const confirmPassword = confirmPasswordElement.value.trim();
 
   if (!username || !email || !password || !confirmPassword) {
     showError('Пожалуйста, заполните все поля');
@@ -280,33 +307,28 @@ async function handleRegister(event) {
   }
 }
 
-// Автоматическая проверка авторизации на защищенных страницах
-(async () => {
-  const currentPage = window.location.pathname;
-  const publicPages = ['/login.html', '/register.html'];
-  
-  if (!publicPages.includes(currentPage)) {
-    const isAuth = await authService.checkAuth();
-    if (!isAuth) {
-      window.location.href = '/login.html';
-    }
-  }
-})();
-
-// Добавляем обработчики событий при загрузке страницы
+// Инициализация форм после загрузки DOM
 document.addEventListener('DOMContentLoaded', () => {
-  // Проверяем авторизацию
-  authService.checkAuth();
+  const loginForm = getFormElement('loginForm');
+  const registerForm = getFormElement('registerForm');
 
-  // Находим формы
-  const loginForm = document.getElementById('loginForm');
-  const registerForm = document.getElementById('registerForm');
-
-  // Добавляем обработчики событий для форм
   if (loginForm) {
     loginForm.addEventListener('submit', handleLogin);
   }
+
   if (registerForm) {
     registerForm.addEventListener('submit', handleRegister);
+  }
+
+  // Проверка авторизации на защищенных страницах
+  const currentPage = window.location.pathname;
+  const publicPages = ['/login.html', '/register.html', '/index.html'];
+  
+  if (!publicPages.includes(currentPage)) {
+    authService.checkAuth().then(isAuth => {
+      if (!isAuth) {
+        window.location.href = '/login.html';
+      }
+    });
   }
 }); 
