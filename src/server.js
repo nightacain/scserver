@@ -12,6 +12,17 @@ const matchController = require('./controllers/matchController');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 
+// Проверка наличия необходимых переменных окружения
+if (!process.env.JWT_SECRET) {
+  console.error('КРИТИЧЕСКАЯ ОШИБКА: JWT_SECRET не установлен');
+  process.exit(1);
+}
+
+if (!process.env.MONGODB_URI) {
+  console.error('КРИТИЧЕСКАЯ ОШИБКА: MONGODB_URI не установлен');
+  process.exit(1);
+}
+
 const app = express();
 const httpServer = createServer(app);
 
@@ -77,14 +88,33 @@ app.get('*', (req, res) => {
   }
 });
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Ошибка сервера:', err);
+  res.status(500).json({
+    message: 'Внутренняя ошибка сервера',
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
+
 // MongoDB connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/shadow-checkers';
-mongoose.connect(MONGODB_URI, {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
+.then(() => {
+  console.log('Connected to MongoDB');
+  
+  // Start server only after successful database connection
+  const PORT = process.env.PORT || 3000;
+  httpServer.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+})
+.catch(err => {
+  console.error('MongoDB connection error:', err);
+  process.exit(1);
+});
 
 // Socket.IO middleware для аутентификации
 io.use((socket, next) => {
@@ -214,10 +244,4 @@ io.on('connection', (socket) => {
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy' });
-});
-
-// Start server
-const PORT = process.env.PORT || 5000;
-httpServer.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
 }); 

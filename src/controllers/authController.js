@@ -4,10 +4,12 @@ const authController = {
   // Регистрация пользователя
   register: async (req, res) => {
     try {
+      console.log('Получен запрос на регистрацию:', req.body);
       const { username, email, password } = req.body;
 
       // Проверка наличия всех необходимых полей
       if (!username || !email || !password) {
+        console.log('Отсутствуют обязательные поля:', { username: !!username, email: !!email, password: !!password });
         return res.status(400).json({
           message: 'Все поля обязательны для заполнения'
         });
@@ -16,6 +18,7 @@ const authController = {
       // Проверка существования пользователя
       const userExists = await User.findOne({ $or: [{ email }, { username }] });
       if (userExists) {
+        console.log('Пользователь уже существует:', { email: userExists.email === email, username: userExists.username === username });
         return res.status(400).json({
           message: userExists.email === email 
             ? 'Пользователь с таким email уже существует' 
@@ -30,7 +33,19 @@ const authController = {
         password
       });
 
-      await user.save();
+      try {
+        await user.save();
+        console.log('Пользователь успешно создан:', { id: user._id, username: user.username });
+      } catch (saveError) {
+        console.error('Ошибка при сохранении пользователя:', saveError);
+        if (saveError.name === 'ValidationError') {
+          return res.status(400).json({
+            message: 'Ошибка валидации',
+            errors: Object.values(saveError.errors).map(err => err.message)
+          });
+        }
+        throw saveError;
+      }
 
       // Проверка наличия JWT_SECRET
       if (!process.env.JWT_SECRET) {
