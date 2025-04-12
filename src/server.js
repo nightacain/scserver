@@ -31,15 +31,24 @@ const httpServer = createServer(app);
 
 // Настройка CORS для разных окружений
 const allowedOrigins = [
-  process.env.CLIENT_URL || "http://localhost:3000",
-  "https://your-app-name.vercel.app",
-  "https://your-app-name.netlify.app"
+  'http://localhost:3000',           // Локальная разработка
+  'http://localhost:5000',           // Альтернативный порт для локальной разработки
+  'https://scserver-1.onrender.com', // Продакшен URL
+  undefined,                         // Разрешаем запросы без origin (для Postman и curl)
+  'null'                            // Для локальных файлов
 ];
 
 // Настройка Socket.IO с CORS
 const io = new Server(httpServer, {
   cors: {
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log('Socket.IO CORS отклонен для origin:', origin);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ["GET", "POST"],
     credentials: true
   },
@@ -48,15 +57,17 @@ const io = new Server(httpServer, {
 
 // Настройка CORS для Express
 app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
       console.log('CORS отклонен для origin:', origin);
-      return callback(new Error('CORS policy violation'), false);
+      callback(new Error('Not allowed by CORS'));
     }
-    return callback(null, true);
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Middleware для логирования запросов
