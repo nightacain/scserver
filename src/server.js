@@ -78,20 +78,50 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
-// Serve static files from public directory
-app.use(express.static(path.join(__dirname, '../public')));
+// Middleware для логирования статических файлов
+app.use((req, res, next) => {
+  if (!req.path.startsWith('/api')) {
+    console.log('Запрос статического файла:', req.path);
+  }
+  next();
+});
 
-// Routes for HTML pages
+// Настройка раздачи статических файлов
+const publicPath = path.join(__dirname, '../public');
+console.log('Путь к публичным файлам:', publicPath);
+
+app.use(express.static(publicPath, {
+  index: false, // Отключаем автоматическую отдачу index.html
+  extensions: ['html', 'htm'], // Разрешаем доступ к HTML файлам без расширения
+  setHeaders: (res, path, stat) => {
+    // Устанавливаем правильные заголовки для разных типов файлов
+    if (path.endsWith('.js')) {
+      res.set('Content-Type', 'application/javascript');
+    } else if (path.endsWith('.css')) {
+      res.set('Content-Type', 'text/css');
+    }
+    // Отключаем кэширование для разработки
+    if (process.env.NODE_ENV === 'development') {
+      res.set('Cache-Control', 'no-store');
+    }
+  }
+}));
+
+// Маршруты для HTML страниц
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
+  res.sendFile(path.join(publicPath, 'index.html'));
 });
 
 app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/login.html'));
+  res.sendFile(path.join(publicPath, 'login.html'));
+});
+
+app.get('/register', (req, res) => {
+  res.sendFile(path.join(publicPath, 'register.html'));
 });
 
 app.get('/game', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/game.html'));
+  res.sendFile(path.join(publicPath, 'game.html'));
 });
 
 // API Routes
@@ -103,7 +133,7 @@ app.use('/api/matches', matchRoutes);
 app.get('*', (req, res) => {
   // Если запрос на HTML страницу - отправляем index.html
   if (req.accepts('html')) {
-    res.sendFile(path.join(__dirname, '../public/index.html'));
+    res.sendFile(path.join(publicPath, 'index.html'));
   } else {
     res.status(404).json({ message: 'Not Found' });
   }
