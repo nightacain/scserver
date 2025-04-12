@@ -58,10 +58,12 @@ const io = new Server(httpServer, {
 // Настройка CORS для Express
 app.use(cors({
   origin: (origin, callback) => {
+    console.log('🔍 Входящий CORS origin:', { origin: origin || 'no origin' });
     if (!origin || allowedOrigins.includes(origin)) {
+      console.log('✅ CORS разрешен для origin:', origin || 'no origin');
       callback(null, true);
     } else {
-      console.log('CORS отклонен для origin:', origin);
+      console.log('❌ CORS отклонен для origin:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -76,6 +78,7 @@ app.use(express.json({
     try {
       JSON.parse(buf);
     } catch (e) {
+      console.error('❌ Ошибка парсинга JSON:', e.message);
       res.status(400).json({ message: 'Invalid JSON' });
       throw new Error('Invalid JSON');
     }
@@ -89,15 +92,21 @@ app.use((req, res, next) => {
     url: req.url,
     origin: req.get('origin') || 'no origin',
     contentType: req.get('content-type'),
+    headers: {
+      'user-agent': req.get('user-agent'),
+      'accept': req.get('accept'),
+      'accept-encoding': req.get('accept-encoding'),
+      'connection': req.get('connection')
+    },
     body: req.method === 'POST' || req.method === 'PUT' ? req.body : undefined
   };
   
   // Не логируем пароли
   if (logData.body && logData.body.password) {
-    logData.body.password = '[СКРЫТО]';
+    logData.body = { ...logData.body, password: '[СКРЫТО]' };
   }
   
-  console.log('Входящий запрос:', logData);
+  console.log('📝 Детали входящего запроса:', JSON.stringify(logData, null, 2));
   next();
 });
 
@@ -200,144 +209,4 @@ const connectWithRetry = (retries = 5, delay = 5000) => {
     console.error('Ошибка подключения к MongoDB:', err);
     
     if (retries > 0) {
-      console.log(`Повторная попытка через ${delay/1000} секунд...`);
-      setTimeout(() => connectWithRetry(retries - 1, delay), delay);
-    } else {
-      console.error('Не удалось подключиться к MongoDB после всех попыток');
-      process.exit(1);
-    }
-  });
-};
-
-// Start connection process
-connectWithRetry();
-
-// Socket.IO middleware для аутентификации
-io.use((socket, next) => {
-  const token = socket.handshake.auth.token;
-  if (!token) {
-    return next(new Error('Authentication error'));
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    socket.userId = decoded.id;
-    socket.username = decoded.username;
-    next();
-  } catch (err) {
-    next(new Error('Authentication error'));
-  }
-});
-
-// Хранение времени начала игры
-const gameTimes = new Map();
-
-// Socket.IO connection handling
-io.on('connection', (socket) => {
-  console.log('User connected:', socket.username);
-
-  socket.on('find_game', () => {
-    const session = GameSessionManager.addToMatchmaking(socket.userId);
-    
-    if (session) {
-      const { gameId, players } = session;
-      gameTimes.set(gameId, Date.now());
-      
-      Object.keys(players).forEach(playerId => {
-        io.to(playerId).emit('game_found', {
-          gameId,
-          players,
-          board: session.board,
-          yourColor: players[playerId].color
-        });
-      });
-    } else {
-      socket.emit('waiting_for_opponent');
-    }
-  });
-
-  socket.on('join_game', (gameId) => {
-    const session = GameSessionManager.getSession(gameId);
-    if (session && session.players[socket.userId]) {
-      socket.join(gameId);
-      socket.emit('game_state', session);
-    }
-  });
-
-  socket.on('make_move', ({ gameId, from, to }) => {
-    const updatedSession = GameSessionManager.makeMove(gameId, socket.userId, from, to);
-    
-    if (updatedSession) {
-      io.to(gameId).emit('game_state', updatedSession);
-    } else {
-      socket.emit('invalid_move');
-    }
-  });
-
-  socket.on('surrender', async (gameId) => {
-    const session = GameSessionManager.getSession(gameId);
-    if (session && session.players[socket.userId]) {
-      session.status = 'finished';
-      session.winner = Object.keys(session.players).find(id => id !== socket.userId);
-
-      try {
-        const startTime = gameTimes.get(gameId);
-        const duration = Math.floor((Date.now() - startTime) / 1000);
-        
-        await matchController.createMatch({
-          winner: session.winner,
-          loser: socket.userId,
-          winnerColor: session.players[session.winner].color,
-          endReason: 'surrender',
-          duration
-        });
-
-        gameTimes.delete(gameId);
-      } catch (error) {
-        console.error('Ошибка при сохранении результатов матча:', error);
-      }
-
-      io.to(gameId).emit('game_ended', {
-        winner: session.winner,
-        reason: 'surrender'
-      });
-    }
-  });
-
-  socket.on('disconnect', async () => {
-    const gameId = GameSessionManager.removePlayer(socket.userId);
-    if (gameId) {
-      const session = GameSessionManager.getSession(gameId);
-      
-      try {
-        const startTime = gameTimes.get(gameId);
-        if (startTime) {
-          const duration = Math.floor((Date.now() - startTime) / 1000);
-          
-          await matchController.createMatch({
-            winner: session.winner,
-            loser: socket.userId,
-            winnerColor: session.players[session.winner].color,
-            endReason: 'disconnect',
-            duration
-          });
-
-          gameTimes.delete(gameId);
-        }
-      } catch (error) {
-        console.error('Ошибка при сохранении результатов матча:', error);
-      }
-
-      io.to(gameId).emit('game_ended', {
-        winner: session.winner,
-        reason: 'disconnect'
-      });
-    }
-    console.log('User disconnected:', socket.username);
-  });
-});
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'healthy' });
-}); 
+      console.log(`

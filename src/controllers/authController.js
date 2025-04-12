@@ -14,9 +14,12 @@ const authController = {
   // Регистрация пользователя
   register: async (req, res) => {
     try {
-      console.log('Получен запрос на регистрацию:', {
-        ...req.body,
-        password: '[СКРЫТО]'
+      console.log('🔍 Тело запроса регистрации:', {
+        raw: req.body,
+        parsed: {
+          ...req.body,
+          password: '[СКРЫТО]'
+        }
       });
 
       const { username, email, password } = req.body;
@@ -35,12 +38,14 @@ const authController = {
         .reduce((acc, [field, error]) => ({ ...acc, [field]: error }), {});
 
       if (Object.keys(errors).length > 0) {
-        console.log('Ошибки валидации:', errors);
+        console.log('❌ Ошибки валидации:', errors);
         return res.status(400).json({
           message: 'Ошибка валидации данных',
           errors
         });
       }
+
+      console.log('✅ Валидация пройдена, проверка существующего пользователя...');
 
       // Проверка существования пользователя
       const existingUser = await User.findOne({
@@ -56,9 +61,11 @@ const authController = {
             ? 'Пользователь с таким email уже существует'
             : 'Пользователь с таким именем уже существует'
         };
-        console.log('Пользователь существует:', error);
+        console.log('❌ Пользователь существует:', error);
         return res.status(400).json(error);
       }
+
+      console.log('✅ Пользователь не существует, создаем нового...');
 
       // Создание нового пользователя
       const user = new User({
@@ -68,18 +75,19 @@ const authController = {
       });
 
       try {
-        console.log('Сохранение пользователя...');
+        console.log('💾 Сохранение пользователя...');
         await user.save();
-        console.log('Пользователь создан:', {
+        console.log('✅ Пользователь успешно создан:', {
           id: user._id,
           username: user.username,
           email: user.email
         });
       } catch (saveError) {
-        console.error('Ошибка сохранения:', {
+        console.error('❌ Ошибка сохранения:', {
           name: saveError.name,
           code: saveError.code,
-          message: saveError.message
+          message: saveError.message,
+          stack: saveError.stack
         });
 
         if (saveError.name === 'ValidationError') {
@@ -102,9 +110,11 @@ const authController = {
       }
 
       // Генерация токена
+      console.log('🔑 Генерация JWT токена...');
       const token = user.generateAuthToken();
+      console.log('✅ Токен сгенерирован');
 
-      res.status(201).json({
+      const response = {
         message: 'Регистрация успешна',
         token,
         user: {
@@ -114,9 +124,16 @@ const authController = {
           gamesPlayed: user.gamesPlayed,
           gamesWon: user.gamesWon
         }
+      };
+
+      console.log('✅ Отправка успешного ответа:', {
+        ...response,
+        token: token.substring(0, 10) + '...'
       });
+
+      res.status(201).json(response);
     } catch (error) {
-      console.error('Критическая ошибка при регистрации:', {
+      console.error('❌ Критическая ошибка при регистрации:', {
         name: error.name,
         message: error.message,
         stack: error.stack
