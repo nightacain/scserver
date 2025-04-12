@@ -52,14 +52,14 @@
 </head>
 <body>
     <div class="auth-container">
-        <img src="/images/logo.png" alt="Шашки" class="auth-logo">
-        <form id="loginForm">
-            <input type="email" id="email" class="auth-input" placeholder="Email" required>
+        <img src="/images/logo.png" alt="Логотип игры" class="auth-logo">
+        <form id="loginForm" class="auth-form">
+            <input type="text" id="username" class="auth-input" placeholder="Имя пользователя" required>
             <input type="password" id="password" class="auth-input" placeholder="Пароль" required>
             <button type="submit" class="auth-button">Войти</button>
+            <a href="/register.html" class="auth-link">Зарегистрироваться</a>
         </form>
-        <p>Нет аккаунта? <a href="/register.html" class="auth-link">Зарегистрироваться</a></p>
     </div>
-    <script src="/js/auth.js" defer></script>
+    <script src="/js/auth.js"></script>
 </body>
 </html> 

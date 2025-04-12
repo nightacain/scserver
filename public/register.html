@@ -52,15 +52,15 @@
 </head>
 <body>
     <div class="auth-container">
-        <img src="/images/logo.png" alt="Шашки" class="auth-logo">
-        <form id="registerForm" onsubmit="handleRegister(event)">
+        <img src="/images/logo.png" alt="Логотип игры" class="auth-logo">
+        <form id="registerForm" class="auth-form">
             <input type="text" id="username" class="auth-input" placeholder="Имя пользователя" required>
             <input type="email" id="email" class="auth-input" placeholder="Email" required>
             <input type="password" id="password" class="auth-input" placeholder="Пароль" required>
             <input type="password" id="confirmPassword" class="auth-input" placeholder="Подтвердите пароль" required>
             <button type="submit" class="auth-button">Зарегистрироваться</button>
+            <a href="/login.html" class="auth-link">Уже есть аккаунт? Войти</a>
         </form>
-        <p>Уже есть аккаунт? <a href="/login.html" class="auth-link">Войти</a></p>
     </div>
     <script src="/js/auth.js"></script>
 </body>

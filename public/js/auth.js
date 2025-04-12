@@ -8,128 +8,6 @@ function showError(message) {
     alert(message);
 }
 
-// Функции для работы с токеном
-const saveToken = (token) => {
-    localStorage.setItem('token', token);
-};
-
-const getToken = () => {
-    return localStorage.getItem('token');
-};
-
-const removeToken = () => {
-    localStorage.removeItem('token');
-};
-
-// Функция для проверки авторизации
-const checkAuth = async () => {
-    const token = getToken();
-    if (!token) {
-        window.location.href = '/login.html';
-        return false;
-    }
-    try {
-        const response = await fetch('/api/auth/verify', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        if (!response.ok) {
-            throw new Error('Токен недействителен');
-        }
-        return true;
-    } catch (error) {
-        console.error('Ошибка проверки авторизации:', error);
-        removeToken();
-        window.location.href = '/login.html';
-        return false;
-    }
-};
-
-// Функция входа
-const login = async () => {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-
-    if (!email || !password) {
-        alert('Пожалуйста, заполните все поля');
-        return;
-    }
-
-    try {
-        const response = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, password })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || 'Ошибка входа');
-        }
-
-        saveToken(data.token);
-        window.location.href = '/game.html';
-    } catch (error) {
-        alert(error.message || 'Произошла ошибка при входе');
-    }
-};
-
-// Функция регистрации
-const register = async () => {
-    const username = document.getElementById('username').value;
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-
-    if (!username || !email || !password || !confirmPassword) {
-        alert('Пожалуйста, заполните все поля');
-        return;
-    }
-
-    if (password !== confirmPassword) {
-        alert('Пароли не совпадают');
-        return;
-    }
-
-    try {
-        const response = await fetch('/api/auth/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username, email, password })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || 'Ошибка регистрации');
-        }
-
-        saveToken(data.token);
-        window.location.href = '/game.html';
-    } catch (error) {
-        alert(error.message || 'Произошла ошибка при регистрации');
-    }
-};
-
-// Функция выхода
-const logout = () => {
-    removeToken();
-    window.location.href = '/login.html';
-};
-
-// Проверка авторизации при загрузке защищенных страниц
-if (window.location.pathname !== '/login.html' && 
-    window.location.pathname !== '/register.html') {
-    checkAuth();
-}
-
 class AuthService {
   constructor() {
     this.baseUrl = API_URL;
@@ -240,84 +118,87 @@ const authService = new AuthService();
 function getFormElement(id) {
   const element = document.getElementById(id);
   if (!element) {
-    console.error(`Элемент с id '${id}' не найден`);
+    console.error(`Элемент с id '${id}' не найден на странице ${window.location.pathname}`);
     return null;
   }
   return element;
 }
 
-async function handleLogin(event) {
-  if (event) event.preventDefault();
-  
-  const emailElement = getFormElement('email');
-  const passwordElement = getFormElement('password');
-  
-  if (!emailElement || !passwordElement) {
-    showError('Ошибка: форма входа не найдена');
-    return;
-  }
-
-  const email = emailElement.value.trim();
-  const password = passwordElement.value.trim();
-
-  if (!email || !password) {
-    showError('Пожалуйста, заполните все поля');
-    return;
-  }
-
-  try {
-    await authService.login(email, password);
-  } catch (error) {
-    console.error('Ошибка входа:', error);
-  }
-}
-
-async function handleRegister(event) {
-  if (event) event.preventDefault();
-  
-  const usernameElement = getFormElement('username');
-  const emailElement = getFormElement('email');
-  const passwordElement = getFormElement('password');
-  const confirmPasswordElement = getFormElement('confirmPassword');
-  
-  if (!usernameElement || !emailElement || !passwordElement || !confirmPasswordElement) {
-    showError('Ошибка: форма регистрации не найдена');
-    return;
-  }
-
-  const username = usernameElement.value.trim();
-  const email = emailElement.value.trim();
-  const password = passwordElement.value.trim();
-  const confirmPassword = confirmPasswordElement.value.trim();
-
-  if (!username || !email || !password || !confirmPassword) {
-    showError('Пожалуйста, заполните все поля');
-    return;
-  }
-
-  if (password !== confirmPassword) {
-    showError('Пароли не совпадают');
-    return;
-  }
-
-  try {
-    await authService.register(username, email, password);
-  } catch (error) {
-    console.error('Ошибка регистрации:', error);
-  }
-}
-
 // Инициализация форм после загрузки DOM
 document.addEventListener('DOMContentLoaded', () => {
-  const loginForm = getFormElement('loginForm');
-  const registerForm = getFormElement('registerForm');
+  console.log('DOM загружен, текущая страница:', window.location.pathname);
 
+  // Обработчик формы входа
+  const loginForm = document.getElementById('loginForm');
   if (loginForm) {
-    loginForm.addEventListener('submit', handleLogin);
+    console.log('Найдена форма входа');
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          localStorage.setItem('token', data.token);
+          window.location.href = '/game.html';
+        } else {
+          alert(data.message || 'Ошибка входа');
+        }
+      } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Произошла ошибка при входе');
+      }
+    });
   }
 
+  // Обработчик формы регистрации
+  const registerForm = document.getElementById('registerForm');
   if (registerForm) {
-    registerForm.addEventListener('submit', handleRegister);
+    console.log('Найдена форма регистрации');
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (password !== confirmPassword) {
+        alert('Пароли не совпадают');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert('Регистрация успешна! Теперь вы можете войти.');
+          window.location.href = '/login.html';
+        } else {
+          alert(data.message || 'Ошибка регистрации');
+        }
+      } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Произошла ошибка при регистрации');
+      }
+    });
   }
 
   // Проверка авторизации на защищенных страницах
@@ -325,6 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const publicPages = ['/login.html', '/register.html', '/index.html'];
   
   if (!publicPages.includes(currentPage)) {
+    console.log('Проверка авторизации для защищенной страницы:', currentPage);
     authService.checkAuth().then(isAuth => {
       if (!isAuth) {
         window.location.href = '/login.html';
