@@ -3,37 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shadow Checkers - Вход</title>
+    <title>Shadow Checkers - Авторизация</title>
     <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        #loginForm, #registerForm {
+            display: none;
+        }
+        #loginForm.active, #registerForm.active {
+            display: block;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <div class="card fade-in">
             <h1 class="game-title text-center mb-4">Shadow Checkers</h1>
             
-            <form id="loginForm" class="fade-in">
+            <!-- Форма входа -->
+            <form id="loginForm" class="fade-in active">
+                <h2 class="text-center mb-3">Вход</h2>
                 <div class="form-group">
-                    <label class="form-label" for="username">Имя пользователя</label>
-                    <input type="text" id="username" name="username" class="form-input" 
+                    <label class="form-label" for="login-username">Имя пользователя</label>
+                    <input type="text" id="login-username" name="username" class="form-input" 
                            required minlength="3" maxlength="30">
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label" for="password">Пароль</label>
-                    <input type="password" id="password" name="password" class="form-input"
+                    <label class="form-label" for="login-password">Пароль</label>
+                    <input type="password" id="login-password" name="password" class="form-input"
                            required minlength="6">
                 </div>
                 
                 <div class="game-controls">
                     <button type="submit" class="btn btn-primary">Войти</button>
-                    <button type="button" class="btn btn-secondary" onclick="handleSubmit(event, false)">
-                        Зарегистрироваться
+                    <button type="button" class="btn btn-secondary" onclick="toggleForms()">
+                        Регистрация
+                    </button>
+                </div>
+            </form>
+
+            <!-- Форма регистрации -->
+            <form id="registerForm" class="fade-in">
+                <h2 class="text-center mb-3">Регистрация</h2>
+                <div class="form-group">
+                    <label class="form-label" for="register-username">Имя пользователя</label>
+                    <input type="text" id="register-username" name="username" class="form-input" 
+                           required minlength="3" maxlength="30">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="register-email">Email</label>
+                    <input type="email" id="register-email" name="email" class="form-input" 
+                           required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="register-password">Пароль</label>
+                    <input type="password" id="register-password" name="password" class="form-input"
+                           required minlength="6">
+                </div>
+                
+                <div class="game-controls">
+                    <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+                    <button type="button" class="btn btn-secondary" onclick="toggleForms()">
+                        Назад ко входу
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
+    <script>
+    function toggleForms() {
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        
+        loginForm.classList.toggle('active');
+        registerForm.classList.toggle('active');
+    }
+
+    // Добавляем обработчики событий при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+
+        if (loginForm) {
+            loginForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                handleLogin(event);
+            });
+        }
+
+        if (registerForm) {
+            registerForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                handleRegister(event);
+            });
+        }
+    });
+    </script>
     <script src="/js/auth.js"></script>
 </body>
 </html>
