@@ -1,10 +1,15 @@
 class AuthService {
   constructor() {
-    this.baseUrl = '/api/auth';
+    this.baseUrl = window.location.origin + '/api/auth';
   }
 
   async register(username, email, password) {
     try {
+      console.log('Отправка запроса на регистрацию:', {
+        url: `${this.baseUrl}/register`,
+        body: { username, email, password }
+      });
+
       const response = await fetch(`${this.baseUrl}/register`, {
         method: 'POST',
         headers: {
@@ -13,12 +18,18 @@ class AuthService {
         body: JSON.stringify({ username, email, password })
       });
 
-      const data = await response.json();
-      
       if (!response.ok) {
-        throw new Error(data.message || 'Ошибка при регистрации');
+        const errorText = await response.text();
+        console.error('Ответ сервера:', errorText);
+        try {
+          const errorData = JSON.parse(errorText);
+          throw new Error(errorData.message || 'Ошибка при регистрации');
+        } catch (e) {
+          throw new Error(`Ошибка при регистрации: ${errorText}`);
+        }
       }
 
+      const data = await response.json();
       alert('Регистрация успешна! Теперь вы можете войти.');
       return data;
     } catch (error) {
