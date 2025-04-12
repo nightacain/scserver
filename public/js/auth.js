@@ -99,16 +99,14 @@ class AuthService {
 const authService = new AuthService();
 
 // Функции-обработчики для форм
-async function handleSubmit(event, isLogin = true) {
+async function handleLogin(event) {
   event.preventDefault();
   
-  const prefix = isLogin ? 'login-' : 'register-';
-  const username = document.getElementById(prefix + 'username').value;
-  const password = document.getElementById(prefix + 'password').value;
-  const email = isLogin ? null : document.getElementById('register-email').value;
+  const username = document.getElementById('login-username').value;
+  const password = document.getElementById('login-password').value;
 
   // Валидация полей
-  if (!username || !password || (!isLogin && !email)) {
+  if (!username || !password) {
     alert('Пожалуйста, заполните все поля');
     return;
   }
@@ -118,33 +116,45 @@ async function handleSubmit(event, isLogin = true) {
     return;
   }
 
-  if (!isLogin && !email.match(/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/)) {
-    alert('Пожалуйста, введите корректный email');
-    return;
-  }
-
   try {
-    if (isLogin) {
-      await authService.login(username, password);
-      window.location.href = '/game.html';
-    } else {
-      await authService.register(username, email, password);
-      // После успешной регистрации показываем форму входа
-      toggleForms();
-      document.getElementById('registerForm').reset();
-    }
+    await authService.login(username, password);
+    window.location.href = '/game.html';
   } catch (error) {
     alert(error.message);
   }
 }
 
-// Функции для кнопок
-async function login(event) {
-  await handleSubmit(event, true);
-}
+async function handleRegister(event) {
+  event.preventDefault();
+  
+  const username = document.getElementById('register-username').value;
+  const email = document.getElementById('register-email').value;
+  const password = document.getElementById('register-password').value;
 
-async function register(event) {
-  await handleSubmit(event, false);
+  // Валидация полей
+  if (!username || !password || !email) {
+    alert('Пожалуйста, заполните все поля');
+    return;
+  }
+
+  if (password.length < 6) {
+    alert('Пароль должен быть не менее 6 символов');
+    return;
+  }
+
+  if (!email.match(/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/)) {
+    alert('Пожалуйста, введите корректный email');
+    return;
+  }
+
+  try {
+    await authService.register(username, email, password);
+    // После успешной регистрации показываем форму входа
+    toggleForms();
+    document.getElementById('registerForm').reset();
+  } catch (error) {
+    alert(error.message);
+  }
 }
 
 // Добавляем обработчики событий при загрузке страницы
@@ -158,9 +168,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Добавляем обработчики событий для форм
   if (loginForm) {
-    loginForm.addEventListener('submit', login);
+    loginForm.addEventListener('submit', handleLogin);
   }
   if (registerForm) {
-    registerForm.addEventListener('submit', register);
+    registerForm.addEventListener('submit', handleRegister);
   }
 }); 
