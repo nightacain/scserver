@@ -6,6 +6,13 @@ const authController = {
     try {
       const { username, email, password } = req.body;
 
+      // Проверка наличия всех необходимых полей
+      if (!username || !email || !password) {
+        return res.status(400).json({
+          message: 'Все поля обязательны для заполнения'
+        });
+      }
+
       // Проверка существования пользователя
       const userExists = await User.findOne({ $or: [{ email }, { username }] });
       if (userExists) {
@@ -25,6 +32,12 @@ const authController = {
 
       await user.save();
 
+      // Проверка наличия JWT_SECRET
+      if (!process.env.JWT_SECRET) {
+        console.error('JWT_SECRET не установлен');
+        return res.status(500).json({ message: 'Ошибка конфигурации сервера' });
+      }
+
       // Генерация токена
       const token = user.generateAuthToken();
 
@@ -40,7 +53,11 @@ const authController = {
         }
       });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      console.error('Ошибка при регистрации:', error);
+      res.status(500).json({ 
+        message: 'Ошибка при регистрации пользователя',
+        error: error.message 
+      });
     }
   },
 
