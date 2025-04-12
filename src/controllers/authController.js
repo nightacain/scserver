@@ -1,69 +1,85 @@
 const User = require('../models/User');
 
+// Вспомогательные функции валидации
+const validateEmail = (email) => {
+  const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return re.test(email);
+};
+
+const validatePassword = (password) => {
+  return password.length >= 6;
+};
+
 const authController = {
   // Регистрация пользователя
   register: async (req, res) => {
     try {
       console.log('Получен запрос на регистрацию:', {
         ...req.body,
-        password: '[СКРЫТО]' // Не логируем пароль
+        password: '[СКРЫТО]'
       });
 
       const { username, email, password } = req.body;
 
       // Проверка наличия всех необходимых полей
-      if (!username || !email || !password) {
-        console.log('Отсутствуют обязательные поля:', {
-          username: !!username,
-          email: !!email,
-          password: !!password
-        });
+      const validationErrors = {
+        username: !username ? 'Отсутствует имя пользователя' : null,
+        email: !email ? 'Отсутствует email' : 
+               !validateEmail(email) ? 'Неверный формат email' : null,
+        password: !password ? 'Отсутствует пароль' : 
+                 !validatePassword(password) ? 'Пароль должен быть не менее 6 символов' : null
+      };
+
+      const errors = Object.entries(validationErrors)
+        .filter(([_, error]) => error !== null)
+        .reduce((acc, [field, error]) => ({ ...acc, [field]: error }), {});
+
+      if (Object.keys(errors).length > 0) {
+        console.log('Ошибки валидации:', errors);
         return res.status(400).json({
-          message: 'Все поля обязательны для заполнения',
-          details: {
-            username: !username ? 'Отсутствует имя пользователя' : null,
-            email: !email ? 'Отсутствует email' : null,
-            password: !password ? 'Отсутствует пароль' : null
-          }
+          message: 'Ошибка валидации данных',
+          errors
         });
       }
 
-      console.log('Проверка существования пользователя...');
       // Проверка существования пользователя
-      const userExists = await User.findOne({ $or: [{ email }, { username }] });
-      if (userExists) {
-        console.log('Пользователь уже существует:', {
-          existingEmail: userExists.email === email,
-          existingUsername: userExists.username === username
-        });
-        return res.status(400).json({
-          message: userExists.email === email 
-            ? 'Пользователь с таким email уже существует' 
+      const existingUser = await User.findOne({
+        $or: [
+          { email: email.toLowerCase() },
+          { username: { $regex: new RegExp('^' + username + '$', 'i') } }
+        ]
+      });
+
+      if (existingUser) {
+        const error = {
+          message: existingUser.email.toLowerCase() === email.toLowerCase()
+            ? 'Пользователь с таким email уже существует'
             : 'Пользователь с таким именем уже существует'
-        });
+        };
+        console.log('Пользователь существует:', error);
+        return res.status(400).json(error);
       }
 
-      console.log('Создание нового пользователя...');
       // Создание нового пользователя
       const user = new User({
         username,
-        email,
+        email: email.toLowerCase(),
         password
       });
 
       try {
-        console.log('Сохранение пользователя в базу данных...');
+        console.log('Сохранение пользователя...');
         await user.save();
-        console.log('Пользователь успешно создан:', {
+        console.log('Пользователь создан:', {
           id: user._id,
           username: user.username,
           email: user.email
         });
       } catch (saveError) {
-        console.error('Ошибка при сохранении пользователя:', {
+        console.error('Ошибка сохранения:', {
           name: saveError.name,
-          message: saveError.message,
-          errors: saveError.errors
+          code: saveError.code,
+          message: saveError.message
         });
 
         if (saveError.name === 'ValidationError') {
@@ -78,20 +94,16 @@ const authController = {
 
         if (saveError.code === 11000) {
           return res.status(400).json({
-            message: 'Пользователь с таким email или именем уже существует',
-            error: saveError.message
+            message: 'Пользователь с таким email или именем уже существует'
           });
         }
 
         throw saveError;
       }
 
-      console.log('Генерация JWT токена...');
       // Генерация токена
       const token = user.generateAuthToken();
-      console.log('Токен успешно сгенерирован');
 
-      console.log('Отправка успешного ответа...');
       res.status(201).json({
         message: 'Регистрация успешна',
         token,
@@ -112,7 +124,7 @@ const authController = {
       
       res.status(500).json({ 
         message: 'Ошибка при регистрации пользователя',
-        error: error.message 
+        error: process.env.NODE_ENV === 'development' ? error.message : 'Внутренняя ошибка сервера'
       });
     }
   },

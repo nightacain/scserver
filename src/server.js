@@ -70,13 +70,36 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+// Парсинг JSON должен быть до middleware логирования
+app.use(express.json({
+  verify: (req, res, buf) => {
+    try {
+      JSON.parse(buf);
+    } catch (e) {
+      res.status(400).json({ message: 'Invalid JSON' });
+      throw new Error('Invalid JSON');
+    }
+  }
+}));
+
 // Middleware для логирования запросов
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`, req.body);
+  const logData = {
+    method: req.method,
+    url: req.url,
+    origin: req.get('origin') || 'no origin',
+    contentType: req.get('content-type'),
+    body: req.method === 'POST' || req.method === 'PUT' ? req.body : undefined
+  };
+  
+  // Не логируем пароли
+  if (logData.body && logData.body.password) {
+    logData.body.password = '[СКРЫТО]';
+  }
+  
+  console.log('Входящий запрос:', logData);
   next();
 });
-
-app.use(express.json());
 
 // Middleware для логирования статических файлов
 app.use((req, res, next) => {
