@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shadow Checkers - Авторизация</title>
     <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        #loginForm, #registerForm {
+            display: none;
+        }
+        #loginForm.active, #registerForm.active {
+            display: block;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -12,7 +20,7 @@
             <h1 class="game-title text-center mb-4">Shadow Checkers</h1>
             
             <!-- Форма входа -->
-            <form id="loginForm" class="fade-in">
+            <form id="loginForm" class="fade-in active">
                 <h2 class="text-center mb-3">Вход</h2>
                 <div class="form-group">
                     <label class="form-label" for="login-username">Имя пользователя</label>
@@ -35,7 +43,7 @@
             </form>
 
             <!-- Форма регистрации -->
-            <form id="registerForm" class="fade-in" style="display: none;">
+            <form id="registerForm" class="fade-in">
                 <h2 class="text-center mb-3">Регистрация</h2>
                 <div class="form-group">
                     <label class="form-label" for="register-username">Имя пользователя</label>
@@ -70,13 +78,8 @@
         const loginForm = document.getElementById('loginForm');
         const registerForm = document.getElementById('registerForm');
         
-        if (loginForm.style.display === 'none') {
-            loginForm.style.display = 'block';
-            registerForm.style.display = 'none';
-        } else {
-            loginForm.style.display = 'none';
-            registerForm.style.display = 'block';
-        }
+        loginForm.classList.toggle('active');
+        registerForm.classList.toggle('active');
     }
     </script>
     <script src="/js/auth.js"></script>
