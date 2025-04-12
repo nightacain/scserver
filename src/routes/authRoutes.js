@@ -3,13 +3,18 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 const auth = require('../middleware/auth');
 
-// Регистрация
+// Маршрут для регистрации
 router.post('/register', authController.register);
 
-// Вход
+// Маршрут для входа
 router.post('/login', authController.login);
 
-// Получение профиля (защищенный маршрут)
+// Маршрут для проверки токена
+router.get('/verify', auth, (req, res) => {
+    res.json({ valid: true });
+});
+
+// Маршрут для получения профиля пользователя
 router.get('/profile', auth, authController.getProfile);
 
 module.exports = router; 

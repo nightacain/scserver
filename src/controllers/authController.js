@@ -4,21 +4,38 @@ const authController = {
   // Регистрация пользователя
   register: async (req, res) => {
     try {
-      console.log('Получен запрос на регистрацию:', req.body);
+      console.log('Получен запрос на регистрацию:', {
+        ...req.body,
+        password: '[СКРЫТО]' // Не логируем пароль
+      });
+
       const { username, email, password } = req.body;
 
       // Проверка наличия всех необходимых полей
       if (!username || !email || !password) {
-        console.log('Отсутствуют обязательные поля:', { username: !!username, email: !!email, password: !!password });
+        console.log('Отсутствуют обязательные поля:', {
+          username: !!username,
+          email: !!email,
+          password: !!password
+        });
         return res.status(400).json({
-          message: 'Все поля обязательны для заполнения'
+          message: 'Все поля обязательны для заполнения',
+          details: {
+            username: !username ? 'Отсутствует имя пользователя' : null,
+            email: !email ? 'Отсутствует email' : null,
+            password: !password ? 'Отсутствует пароль' : null
+          }
         });
       }
 
+      console.log('Проверка существования пользователя...');
       // Проверка существования пользователя
       const userExists = await User.findOne({ $or: [{ email }, { username }] });
       if (userExists) {
-        console.log('Пользователь уже существует:', { email: userExists.email === email, username: userExists.username === username });
+        console.log('Пользователь уже существует:', {
+          existingEmail: userExists.email === email,
+          existingUsername: userExists.username === username
+        });
         return res.status(400).json({
           message: userExists.email === email 
             ? 'Пользователь с таким email уже существует' 
@@ -26,6 +43,7 @@ const authController = {
         });
       }
 
+      console.log('Создание нового пользователя...');
       // Создание нового пользователя
       const user = new User({
         username,
@@ -34,28 +52,46 @@ const authController = {
       });
 
       try {
+        console.log('Сохранение пользователя в базу данных...');
         await user.save();
-        console.log('Пользователь успешно создан:', { id: user._id, username: user.username });
+        console.log('Пользователь успешно создан:', {
+          id: user._id,
+          username: user.username,
+          email: user.email
+        });
       } catch (saveError) {
-        console.error('Ошибка при сохранении пользователя:', saveError);
+        console.error('Ошибка при сохранении пользователя:', {
+          name: saveError.name,
+          message: saveError.message,
+          errors: saveError.errors
+        });
+
         if (saveError.name === 'ValidationError') {
           return res.status(400).json({
             message: 'Ошибка валидации',
-            errors: Object.values(saveError.errors).map(err => err.message)
+            errors: Object.values(saveError.errors).map(err => ({
+              field: err.path,
+              message: err.message
+            }))
           });
         }
+
+        if (saveError.code === 11000) {
+          return res.status(400).json({
+            message: 'Пользователь с таким email или именем уже существует',
+            error: saveError.message
+          });
+        }
+
         throw saveError;
       }
 
-      // Проверка наличия JWT_SECRET
-      if (!process.env.JWT_SECRET) {
-        console.error('JWT_SECRET не установлен');
-        return res.status(500).json({ message: 'Ошибка конфигурации сервера' });
-      }
-
+      console.log('Генерация JWT токена...');
       // Генерация токена
       const token = user.generateAuthToken();
+      console.log('Токен успешно сгенерирован');
 
+      console.log('Отправка успешного ответа...');
       res.status(201).json({
         message: 'Регистрация успешна',
         token,
@@ -68,7 +104,12 @@ const authController = {
         }
       });
     } catch (error) {
-      console.error('Ошибка при регистрации:', error);
+      console.error('Критическая ошибка при регистрации:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+      
       res.status(500).json({ 
         message: 'Ошибка при регистрации пользователя',
         error: error.message 

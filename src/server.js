@@ -23,6 +23,9 @@ if (!process.env.MONGODB_URI) {
   process.exit(1);
 }
 
+console.log('Настройка подключения к MongoDB...');
+console.log('MONGODB_URI:', process.env.MONGODB_URI.replace(/\/\/[^:]+:[^@]+@/, '//:hidden:@')); // Скрываем пароль в логах
+
 const app = express();
 const httpServer = createServer(app);
 
@@ -48,12 +51,19 @@ app.use(cors({
   origin: function(origin, callback) {
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) === -1) {
+      console.log('CORS отклонен для origin:', origin);
       return callback(new Error('CORS policy violation'), false);
     }
     return callback(null, true);
   },
   credentials: true
 }));
+
+// Middleware для логирования запросов
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`, req.body);
+  next();
+});
 
 app.use(express.json());
 
@@ -90,31 +100,53 @@ app.get('*', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error('Ошибка сервера:', err);
+  console.error('Ошибка сервера:', {
+    message: err.message,
+    stack: err.stack,
+    url: req.url,
+    method: req.method,
+    body: req.body
+  });
+  
   res.status(500).json({
     message: 'Внутренняя ошибка сервера',
     error: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
 });
 
-// MongoDB connection
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => {
-  console.log('Connected to MongoDB');
+// MongoDB connection with retry
+const connectWithRetry = (retries = 5, delay = 5000) => {
+  console.log(`Попытка подключения к MongoDB (осталось попыток: ${retries})...`);
   
-  // Start server only after successful database connection
-  const PORT = process.env.PORT || 3000;
-  httpServer.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  return mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000
+  })
+  .then(() => {
+    console.log('Успешное подключение к MongoDB');
+    
+    // Start server only after successful database connection
+    const PORT = process.env.PORT || 3000;
+    httpServer.listen(PORT, () => {
+      console.log(`Сервер запущен на порту ${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error('Ошибка подключения к MongoDB:', err);
+    
+    if (retries > 0) {
+      console.log(`Повторная попытка через ${delay/1000} секунд...`);
+      setTimeout(() => connectWithRetry(retries - 1, delay), delay);
+    } else {
+      console.error('Не удалось подключиться к MongoDB после всех попыток');
+      process.exit(1);
+    }
   });
-})
-.catch(err => {
-  console.error('MongoDB connection error:', err);
-  process.exit(1);
-});
+};
+
+// Start connection process
+connectWithRetry();
 
 // Socket.IO middleware для аутентификации
 io.use((socket, next) => {

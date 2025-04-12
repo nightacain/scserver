@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Регистрация - Шашки</title>
+    <title>Вход - Шашки</title>
     <link rel="stylesheet" href="/css/style.css">
     <style>
         .auth-container {
@@ -53,14 +53,12 @@
 <body>
     <div class="auth-container">
         <img src="/images/logo.png" alt="Шашки" class="auth-logo">
-        <form id="registerForm" onsubmit="event.preventDefault(); register();">
-            <input type="text" id="username" class="auth-input" placeholder="Имя пользователя" required>
+        <form id="loginForm" onsubmit="event.preventDefault(); login();">
             <input type="email" id="email" class="auth-input" placeholder="Email" required>
             <input type="password" id="password" class="auth-input" placeholder="Пароль" required>
-            <input type="password" id="confirmPassword" class="auth-input" placeholder="Подтвердите пароль" required>
-            <button type="submit" class="auth-button">Зарегистрироваться</button>
+            <button type="submit" class="auth-button">Войти</button>
         </form>
-        <p>Уже есть аккаунт? <a href="/login.html" class="auth-link">Войти</a></p>
+        <p>Нет аккаунта? <a href="/register.html" class="auth-link">Зарегистрироваться</a></p>
     </div>
     <script src="/js/auth.js"></script>
 </body>
