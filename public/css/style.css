@@ -26,7 +26,7 @@
     color: white;
     z-index: 1000;
     padding: 4rem;
-    background: url('images/frame_menu.png') no-repeat center center;
+    background: url('/images/frame_menu.png') no-repeat center center;
     background-size: 100% 100%;
     min-width: 400px;
     min-height: 500px;
@@ -91,7 +91,7 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow: hidden;
-    background: url('images/background.png') no-repeat center center fixed;
+    background: url('/images/background.png') no-repeat center center fixed;
     background-size: cover;
 }
 
@@ -110,7 +110,7 @@ body.in-game {
     transform: translate(-50%, -50%);
     padding: 140px;
     border: none;
-    background: url('images/frame.png') no-repeat center center;
+    background: url('/images/frame.png') no-repeat center center;
     background-size: calc(100% + 110px) calc(100% + 110px);
     transition: transform 0.3s ease;
     width: 560px;
@@ -132,14 +132,14 @@ body.in-game {
 }
 
 .square.white {
-    background: url('images/white_pieces.png') no-repeat center center;
+    background: url('/images/white_pieces.png') no-repeat center center;
     background-size: cover;
     box-shadow: inset 3px 3px 8px rgba(255, 255, 255, 0.3),
                 inset -3px -3px 8px rgba(0, 0, 0, 0.2);
 }
 
 .square.black {
-    background: url('images/black_pieces.png') no-repeat center center;
+    background: url('/images/black_pieces.png') no-repeat center center;
     background-size: cover;
     box-shadow: inset 3px 3px 8px rgba(0, 0, 0, 0.3),
                 inset -3px -3px 8px rgba(0, 0, 0, 0.4);
@@ -161,7 +161,7 @@ body.in-game {
 }
 
 .piece.white {
-    background: url('images/wp.png') no-repeat center center;
+    background: url('/images/wp.png') no-repeat center center;
     background-size: cover;
     border: 2px solid #e6e6e6;
     box-shadow: inset -4px -4px 10px #f0f0f0,
@@ -171,7 +171,7 @@ body.in-game {
 }
 
 .piece.black {
-    background: url('images/bp.png') no-repeat center center;
+    background: url('/images/bp.png') no-repeat center center;
     background-size: cover;
     border: 2px solid #1a1a1a;
     box-shadow: inset -4px -4px 10px #1a1a1a,
@@ -1745,7 +1745,7 @@ body.in-game #background-video {
 
 /* Обновляем стили для белых и черных пешек с максимальным уровнем */
 .piece.white:has(.knight-icon) {
-    background: url('images/wp.png') no-repeat center center;
+    background: url('/images/wp.png') no-repeat center center;
     background-size: cover;
     border: 2px solid #e6e6e6;
     box-shadow: 0 0 10px rgba(156, 39, 176, 0.5),
@@ -1754,7 +1754,7 @@ body.in-game #background-video {
 }
 
 .piece.black:has(.knight-icon) {
-    background: url('images/bp.png') no-repeat center center;
+    background: url('/images/bp.png') no-repeat center center;
     background-size: cover;
     border: 2px solid #1a1a1a;
     box-shadow: 0 0 10px rgba(156, 39, 176, 0.5),
